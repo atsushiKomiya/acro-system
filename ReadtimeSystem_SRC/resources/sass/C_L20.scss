@@ -1,0 +1,576 @@
+$th-fixed-bgcolor: #b0c4de;
+$td-fixed-bgcolor: #ffffff;
+
+.div-calendar-table {
+    height: 400px;
+}
+
+table {
+    width: 100%;
+}
+
+table thead th {
+    border:1px solid #ffffff !important;
+    text-align: center;
+}
+
+table tbody tr td {
+    text-align: center;
+}
+
+.target-dayofname {
+    width: 90px;
+    height: 16px;
+    text-align: center;
+}
+
+.target-dayofname2 {
+    top: 26px !important;
+}
+
+.th-fixed-base{
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    background: $th-fixed-bgcolor !important;
+    z-index: 6 !important;
+    text-align: center;
+}
+
+.td-fixed-base{
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    background: $td-fixed-bgcolor !important;
+    z-index: 6 !important;
+    text-align: center;
+}
+
+// 住所コード
+
+.addrcd-base {
+    width: 60px;
+}
+
+.th-addrcd {
+    @extend .th-fixed-base;
+    @extend .addrcd-base;
+}
+
+.td-addrcd {
+    @extend .td-fixed-base;
+    @extend .addrcd-base;
+}
+
+// 郵便番号
+.zipcode-base {
+    left: 60px;
+    width: 60px;
+}
+
+.th-zipcode {
+    @extend .th-fixed-base;
+    @extend .zipcode-base;
+}
+
+.td-zipcode {
+    @extend .td-fixed-base;
+    @extend .zipcode-base;
+}
+
+// 都道府県コード
+
+.pref-base {
+    left: 120px;
+    width: 40px;
+}
+
+.th-pref {
+    @extend .th-fixed-base;
+    @extend .pref-base;
+}
+
+.td-pref {
+    @extend .td-fixed-base;
+    @extend .pref-base;
+}
+
+// 市区群
+
+.siku-base {
+    left: 160px;
+    width: 100px;
+}
+
+.th-siku {
+    @extend .th-fixed-base;
+    @extend .siku-base;
+}
+
+.td-siku {
+    @extend .td-fixed-base;
+    @extend .siku-base;
+}
+
+// 町名
+
+.tyou-base {
+    left: 260px;
+    width: 60px;
+}
+
+.th-tyou {
+    @extend .th-fixed-base;
+    @extend .tyou-base;
+}
+
+.td-tyou {
+    @extend .td-fixed-base;
+    @extend .tyou-base;
+}
+
+// デポ名
+.deponame-base {
+    left: 320px;
+    width: 150px;
+}
+
+.th-deponame {
+    @extend .th-fixed-base;
+    @extend .deponame-base;
+}
+
+.td-deponame {
+    @extend .td-fixed-base;
+    @extend .deponame-base;
+}
+
+// 以下非固定項目
+
+// 翌日時間指定
+
+.nextday-base {
+    width: 80px;
+}
+
+.th-nextday {
+    @extend .nextday-base;
+}
+
+.td-nextday {
+    @extend .nextday-base;
+}
+
+// 当日配送可否
+
+.samedayyn-base {
+    width: 80px;
+}
+
+.th-samedayyn {
+    @extend .samedayyn-base;
+}
+
+.td-samedayyn {
+    @extend .samedayyn-base;
+}
+
+// 前日締切時間
+
+.prevdaydeadline-base {
+    width: 80px;
+}
+
+.th-prevdaydeadline {
+    @extend .prevdaydeadline-base;
+}
+
+.td-prevdaydeadline {
+    @extend .prevdaydeadline-base;
+}
+
+// 当日配送締切時間1
+
+.samedaydeadline1-base {
+    width: 80px;
+}
+
+.th-samedaydeadline1 {
+    @extend .samedaydeadline1-base;
+}
+
+.td-samedaydeadline1 {
+    @extend .samedaydeadline1-base;
+}
+
+// 当日配送締切時間2
+
+.samedaydeadline2-base {
+    width: 80px;
+}
+
+.th-samedaydeadline2 {
+    @extend .samedaydeadline2-base;
+}
+
+.td-samedaydeadline2 {
+    @extend .samedaydeadline2-base;
+}
+
+//*************************************************************
+// 月曜前日締切
+.mon_before_deadline_flg-base {
+    width: 55px;
+}
+
+.th-mon_before_deadline_flg {
+    @extend .mon_before_deadline_flg-base;
+}
+
+.td-mon_before_deadline_flg {
+    @extend .mon_before_deadline_flg-base;
+}
+
+// 月曜当日配送
+
+.mon_today_delivery_flg-base {
+    width: 55px;
+}
+
+.th-mon_today_delivery_flg {
+    @extend .mon_today_delivery_flg-base;
+}
+
+.td-mon_today_delivery_flg {
+    @extend .mon_today_delivery_flg-base;
+}
+
+//*************************************************************
+// 火曜前日締切
+.tue_before_deadline_flg-base {
+    width: 55px;
+}
+
+.th-tue_before_deadline_flg {
+    @extend .tue_before_deadline_flg-base;
+}
+
+.td-tue_before_deadline_flg {
+    @extend .tue_before_deadline_flg-base;
+}
+
+// 火曜当日配送
+
+.tue_today_delivery_flg-base {
+    width: 55px;
+}
+
+.th-tue_today_delivery_flg {
+    @extend .tue_today_delivery_flg-base;
+}
+
+.td-tue_today_delivery_flg {
+    @extend .tue_today_delivery_flg-base;
+}
+
+//*************************************************************
+// 水曜前日締切
+.wed_before_deadline_flg-base {
+    width: 55px;
+}
+
+.th-wed_before_deadline_flg {
+    @extend .wed_before_deadline_flg-base;
+}
+
+.td-wed_before_deadline_flg {
+    @extend .wed_before_deadline_flg-base;
+}
+
+// 水曜当日配送
+
+.wed_today_delivery_flg-base {
+    width: 55px;
+}
+
+.th-wed_today_delivery_flg {
+    @extend .wed_today_delivery_flg-base;
+}
+
+.td-wed_today_delivery_flg {
+    @extend .wed_today_delivery_flg-base;
+}
+
+//*************************************************************
+// 木曜前日締切
+.thu_before_deadline_flg-base {
+    width: 55px;
+}
+
+.th-thu_before_deadline_flg {
+    @extend .thu_before_deadline_flg-base;
+}
+
+.td-thu_before_deadline_flg {
+    @extend .thu_before_deadline_flg-base;
+}
+
+// 木曜当日配送
+
+.thu_today_delivery_flg-base {
+    width: 55px;
+}
+
+.th-thu_today_delivery_flg {
+    @extend .thu_today_delivery_flg-base;
+}
+
+.td-thu_today_delivery_flg {
+    @extend .thu_today_delivery_flg-base;
+}
+
+//*************************************************************
+// 金曜前日締切
+.fri_before_deadline_flg-base {
+    width: 55px;
+}
+
+.th-fri_before_deadline_flg {
+    @extend .fri_before_deadline_flg-base;
+}
+
+.td-fri_before_deadline_flg {
+    @extend .fri_before_deadline_flg-base;
+}
+
+// 金曜当日配送
+
+.fri_today_delivery_flg-base {
+    width: 55px;
+}
+
+.th-fri_today_delivery_flg {
+    @extend .fri_today_delivery_flg-base;
+}
+
+.td-fri_today_delivery_flg {
+    @extend .fri_today_delivery_flg-base;
+}
+
+//*************************************************************
+// 土曜前日締切
+.sat_before_deadline_flg-base {
+    width: 55px;
+}
+
+.th-sat_before_deadline_flg {
+    @extend .sat_before_deadline_flg-base;
+}
+
+.td-sat_before_deadline_flg {
+    @extend .sat_before_deadline_flg-base;
+}
+
+// 土曜当日配送
+
+.mon_today_delivery_flg-base {
+    width: 55px;
+}
+
+.th-mon_today_delivery_flg {
+    @extend .mon_today_delivery_flg-base;
+}
+
+.td-mon_today_delivery_flg {
+    @extend .mon_today_delivery_flg-base;
+}
+
+//*************************************************************
+// 日曜前日締切
+.sun_before_deadline_flg-base {
+    width: 55px;
+}
+
+.th-sun_before_deadline_flg {
+    @extend .sun_before_deadline_flg-base;
+}
+
+.td-sun_before_deadline_flg {
+    @extend .sun_before_deadline_flg-base;
+}
+
+// 日曜当日配送
+
+.sun_today_delivery_flg-base {
+    width: 55px;
+}
+
+.th-sun_today_delivery_flg {
+    @extend .sun_today_delivery_flg-base;
+}
+
+.td-sun_today_delivery_flg {
+    @extend .sun_today_delivery_flg-base;
+}
+
+//*************************************************************
+// 祝前前日締切
+.holi_before_deadline_flg-base {
+    width: 55px;
+}
+
+.th-holi_before_deadline_flg {
+    @extend .holi_before_deadline_flg-base;
+}
+
+.td-holi_before_deadline_flg {
+    @extend .holi_before_deadline_flg-base;
+}
+
+// 祝前当日配送
+
+.holi_before_today_delivery_flg-base {
+    width: 55px;
+}
+
+.th-holi_before_today_delivery_flg {
+    @extend .holi_before_today_delivery_flg-base;
+}
+
+.td-holi_before_today_delivery_flg {
+    @extend .holi_before_today_delivery_flg-base;
+}
+
+//*************************************************************
+// 祝日前日締切
+.holi_deadline_flg-base {
+    width: 55px;
+}
+
+.th-td-holi_deadline_flg {
+    @extend .holi_deadline_flg-base;
+}
+
+.td-td-holi_deadline_flg {
+    @extend .holi_deadline_flg-base;
+}
+
+// 祝日当日配送
+
+.holi_today_delivery_flg-base {
+    width: 55px;
+}
+
+.th-holi_today_delivery_flg {
+    @extend .holi_today_delivery_flg-base;
+}
+
+.td-holi_today_delivery_flg {
+    @extend .holi_today_delivery_flg-base;
+}
+
+//*************************************************************
+// 祝後前日締切
+.holi_after_deadline_flg-base {
+    width: 55px;
+}
+
+.th-holi_after_deadline_flg {
+    @extend .holi_after_deadline_flg-base;
+}
+
+.td-holi_after_deadline_flg {
+    @extend .holi_after_deadline_flg-base;
+}
+
+// 祝後当日配送
+
+.holi_after_today_delivery_flg-base {
+    width: 55px;
+}
+
+.th-holi_after_today_delivery_flg {
+    @extend .holi_after_today_delivery_flg-base;
+}
+
+.td-holi_after_today_delivery_flg {
+    @extend .holi_after_today_delivery_flg-base;
+}
+
+//*************************************************************
+// 個人宅可否
+.private_home_flg-base {
+    width: 110px;
+}
+
+.th-private_home_flg {
+    @extend .private_home_flg-base;
+}
+
+.td-private_home_flg {
+    @extend .private_home_flg-base;
+}
+
+//*************************************************************
+// 慶弔区分可否
+.congratulation_kbn_flg-base {
+    width: 110px;
+}
+
+.th-congratulation_kbn_flg {
+    @extend .congratulation_kbn_flg-base;
+}
+
+.td-congratulation_kbn_flg {
+    @extend .congratulation_kbn_flg-base;
+}
+
+//*************************************************************
+// 振替先誘因デポCD
+.transfer_post_depo_cd-base {
+    width: 110px;
+}
+
+.th-transfer_post_depo_cd {
+    @extend .transfer_post_depo_cd-base;
+}
+
+.td-transfer_post_depo_cd {
+    @extend .transfer_post_depo_cd-base;
+}
+
+//*************************************************************
+// 振替先郵便デポ名
+.transfer_post_deponame-base {
+    width: 110px;
+}
+
+.th-transfer_post_deponame {
+    @extend .transfer_post_deponame-base;
+}
+
+.td-transfer_post_deponame {
+    @extend .transfer_post_deponame-base;
+}
+
+//*************************************************************
+// デポリードタイム
+.depo_lead_time-base {
+    width: 110px;
+}
+
+.th-depo_lead_time {
+    @extend .depo_lead_time-base;
+}
+
+.td-depo_lead_time {
+    @extend .depo_lead_time-base;
+}
+
+.under-line {
+    border-bottom: 1px solid black;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin: 0 -1rem 0 1rem;
+}

@@ -1,0 +1,46 @@
+.backSun {
+  background-color: orange;
+}
+
+.backMon {
+  background-color: orange;
+}
+
+.backTue {
+  background-color: orange;
+}
+
+.backWed {
+  background-color: orange;
+}
+
+.backThu {
+  background-color: orange;
+}
+
+.backFri {
+  background-color: orange;
+}
+
+.backSat {
+  background-color: orange;
+}
+
+.backBeforePublic {
+  background-color: orange;
+}
+
+.backPublic {
+  background-color: orange;
+}
+
+.backAfterPublic {
+  background-color: orange;
+}
+
+.flex {
+  display: flex;
+  width: 100%;
+  margin-left: 5%;
+}
+

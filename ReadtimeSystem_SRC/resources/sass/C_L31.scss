@@ -1,0 +1,151 @@
+$div-border-color: #e8e8e8;
+$table-th-bgcolor: #84D383;
+$ql-editor-color: #FFFFFF;
+$under-line-color: #ced4da;
+
+
+.date-float{
+    display:flex;
+}
+.box1 {
+    padding: 0.5rem;
+    border: 2px solid $div-border-color;
+    height: 100%;
+    background-color: $ql-editor-color;
+}
+.item-group-control {
+    display: block;
+    width: 100%;
+    height: calc(1.6em + 0.75rem + 2px);
+    padding: 0.375rem 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 400;
+    line-height: 1.6;
+}
+.irregular-label {
+    font-size: 1.0rem;
+    line-height: 2.0rem;
+}
+.impossible-area {
+    line-height: 40px;
+}
+.time-select-control {
+    display: inline-block;
+    width: auto;
+}
+.tilde{
+    padding: 0px 30px 0px 30px;
+}
+select{
+    vertical-align: middle;
+}
+.select-btn-position {
+    position: absolute;
+    top: 20px;
+    right: 100px;
+}
+.select-delete-btn-position {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+}
+
+/** テーブル */
+.irregular-sticky-table {
+    overflow: scroll;
+    height: 115px;
+
+    table {
+      table-layout: fixed;
+      width: 100%;
+      font-size: 0.75rem;
+      thead tr {
+        th {
+            position: sticky;
+            top: 0px;
+            background-color: $table-th-bgcolor;
+            vertical-align: middle !important;
+            text-align: center;
+            padding: 0.25rem;
+        }
+        .th-check {
+            width: 25px;
+        }
+        .th-no {
+            width: 30px;
+        }
+        .th-depo {
+            width: 100%;
+        }
+        .th-large {
+            width: 20%;
+        }
+        .th-middle {
+            width: 40%;
+        }
+        .th-item {
+            width: 40%;
+        }
+        .th-zip {
+            width: 80px;
+        }
+        .th-pref {
+            width: 80px;
+        }
+        .th-siku {
+            width: 50%;
+        }
+        .th-tyou {
+            width: 50%;
+        }
+      }
+      tbody tr {
+        position: sticky;
+        left: 0;
+        .selected {
+          background-color: #FFA500; 
+        }
+        td {
+          text-align: left;
+          padding: 0.25rem;
+        }
+      }
+      tbody tr.selected {
+        position: sticky;
+        left: 0;
+        background-color: #FFA500; 
+      }
+    }
+}
+
+.irregular-sticky-table table{
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+.irregular-sticky-table td,th{
+  border: 1px solid $div-border-color;
+}
+.irregular-sticky-table table thead tr th {
+  z-index: 5;
+  border-top: 0 !important;
+}
+  
+/** quill-editor */
+.ql-toolbar {
+    background-color: $ql-editor-color;
+}
+.ql-container {
+    min-height: 200px;
+    background-color: $ql-editor-color;
+}
+
+.center {
+    text-align: center;
+}
+
+.under-line {
+    border-bottom: 1px solid $under-line-color;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}

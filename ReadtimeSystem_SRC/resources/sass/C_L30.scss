@@ -1,0 +1,295 @@
+$th-fixed-bgcolor: #b0c4de;
+$td-fixed-bgcolor: #ffffff;
+$under-line-color: #ced4da;
+
+.irregular-label {
+    font-size: 0.9rem;
+    line-height: 2.0rem;
+}
+
+
+.irregular-search {
+    font-size: 0.9rem;
+    line-height: 2.0rem;
+}
+.div-irregular-table {
+    height: 400px;
+}
+
+table {
+    width: 100%;
+}
+
+table thead th {
+    border:1px solid #ffffff !important;
+    text-align: center;
+}
+
+table tbody tr td {
+    text-align: center;
+}
+
+.target-dayofname {
+    width: 110px;
+    text-align: center;
+}
+
+.th-fixed-base{
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    background: $th-fixed-bgcolor !important;
+    z-index: 2;
+    text-align: center;
+}
+
+.td-fixed-base{
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    background: $td-fixed-bgcolor !important;
+    z-index: 1;
+    text-align: center;
+}
+
+.one-line {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// イレギュラーID
+
+.irregular-id-base {
+    width: 30px;
+}
+
+.th-irregular-id {
+    @extend .irregular-id-base;
+}
+
+.td-irregular-id {
+    @extend .irregular-id-base;
+}
+
+// イレギュラー設定区分
+
+.irregular-type-base {
+    width: 100px;
+}
+
+.th-irregular-type {
+    @extend .irregular-type-base;
+}
+
+.td-irregular-type {
+    @extend .irregular-type-base;
+}
+
+// タイトル
+
+.title-base {
+    width: 300px;
+}
+
+.th-title {
+    @extend .title-base;
+}
+
+.td-title {
+    @extend .title-base;
+}
+
+// デポ名
+
+.depo-name-base {
+    width: 300px;
+}
+
+.th-depo-name {
+    @extend .depo-name-base;
+}
+
+.td-depo-name {
+    @extend .depo-name-base;
+}
+
+// 振替先配送デポ名
+
+.trans-depo-name-base {
+    width: 150px;
+}
+
+.th-trans-depo-name {
+    @extend .trans-depo-name-base;
+}
+
+.td-trans-depo-name {
+    @extend .trans-depo-name-base;
+}
+
+// 商品CD
+
+.item-cd-base {
+    width: 80px;
+}
+
+.th-item-cd {
+    @extend .item-cd-base;
+}
+
+.td-item-cd {
+    @extend .item-cd-base;
+}
+
+// 用途
+.c-use-name-base {
+    width: 60px;
+}
+
+.th-c-use-name {
+    @extend .c-use-name-base;
+}
+
+.td-c-use-name {
+    @extend .c-use-name-base;
+}
+
+// 前日締切
+
+.is-before-deadline-undeliv-base {
+    width: 40px;
+}
+
+.th-is-before-deadline-undeliv {
+    @extend .is-before-deadline-undeliv-base;
+}
+
+.td-is-before-deadline-undeliv {
+    @extend .is-before-deadline-undeliv-base;
+}
+
+// 当日締切
+
+.is-today-deadline-undeliv-base {
+    width: 40px;
+}
+
+.th-is-today-deadline-undeliv {
+    @extend .is-today-deadline-undeliv-base;
+}
+
+.td-is-today-deadline-undeliv {
+    @extend .is-today-deadline-undeliv-base;
+}
+
+// 時間指定
+
+.time-select-base {
+    width: 100px;
+}
+
+.th-time-select {
+    @extend .time-select-base;
+}
+
+.td-time-select {
+    @extend .time-select-base;
+}
+
+// 個人宅
+
+.is-personal-delivery-base {
+    width: 45px;
+}
+
+.th-is-personal-delivery {
+    @extend .is-personal-delivery-base;
+}
+
+.td-is-personal-delivery {
+    @extend .is-personal-delivery-base;
+}
+
+// 地域区分
+
+.is-area-base {
+    width: 70px;
+}
+
+.th-is-area {
+    @extend .is-area-base;
+}
+
+.td-is-area {
+    @extend .is-area-base;
+}
+
+// お届け日・時間
+
+.delivery-date-base {
+    width: 150px;
+}
+
+.th-delivery-date {
+    @extend .delivery-date-base;
+}
+
+.td-delivery-date {
+    @extend .delivery-date-base;
+}
+
+// 受注日・期間
+
+.order-date-base {
+    width: 150px;
+}
+
+.th-order-date {
+    @extend .order-date-base;
+}
+
+.td-order-date {
+    @extend .order-date-base;
+}
+
+// 更新者
+
+.updated-id-base {
+    width: 150px;
+}
+
+.th-updated-id {
+    @extend .updated-id-base;
+}
+
+.td-updated-id {
+    @extend .updated-id-base;
+}
+
+// 更新一時
+
+.updated-at-base {
+    width: 150px;
+}
+
+.th-updated-at {
+    @extend .updated-at-base;
+}
+
+.td-updated-at {
+    @extend .updated-at-base;
+}
+
+.under-line {
+    border-bottom: 1px solid $under-line-color;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin: 5px 0 0 0;
+}
+
+.div-indent {
+    padding-left: 15px;
+    width: 100%;
+}

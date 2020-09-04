@@ -1,0 +1,114 @@
+/* 変数定義 */
+$multiple-row-height: 150px;
+$area-bk-color: #3490dc;
+$th-fixed-bgcolor: #b0c4de;
+$color-white: #FFFFFF;
+
+// css
+#tabMenu {
+    padding: 0;
+    display: flex;
+    list-style-type: none;
+}
+  
+#tabMenu li {
+    width: auto;
+    padding: 10px 20px;
+    color: #4595E6;
+    border: 1px solid #4595E6;
+    background-color: white;
+    cursor: pointer;
+}
+  
+#tabMenu li.active {
+    color: white;
+    background-color:#4595E6;
+    transition: .3s;
+}
+
+#tabMenu li.disable {
+    cursor: default;
+    color: #e9e9e9;
+    background: #cccccc;
+    border: 1px solid #cccccc;
+}
+
+.tab-calendar {
+    .row {
+        margin-right: 0px;
+        margin-left: 0px;
+    }
+}
+
+.tab-leadtime {
+    .row {
+        margin-right: 0px;
+        margin-left: 0px;
+    }
+}
+
+.tab-depo-address {
+    .row {
+        margin-right: 0px;
+        margin-left: 0px;
+    }
+}
+
+.tab-depo-item {
+    .row {
+        margin-right: 0px;
+        margin-left: 0px;
+    }
+}
+
+// 複数選択用のRow
+.default-multiple-row {
+    height: $multiple-row-height;
+}
+
+// 複数選択用のSelect
+.default-multiple-select {
+    height: 100% !important;
+}
+
+// 複数選択用のButton
+.default-multiple-button {
+    position: absolute;
+    width: 100px;
+    left: 50%;
+    margin-left: -50px;
+}
+
+.default-top-button {
+    @extend .default-multiple-button;
+    top: 0px;
+}
+
+.default-bottom-button {
+    @extend .default-multiple-button;
+    bottom: 0px;
+}
+
+table.table-hover tbody tr:hover {
+    background-color: #FFA500; 
+}
+
+.under-line {
+    border-bottom: 1px solid black;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    margin: 5px -1rem 0 1rem;
+}
+
+.btn-right{
+    text-align: right;
+}
+
+.th-aria {
+    background-color: $th-fixed-bgcolor !important;
+}
+
+.week-div {
+    width: calc(100% / 10);
+}

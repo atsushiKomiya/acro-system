@@ -1,0 +1,165 @@
+.irregular-label {
+  font-size: 0.9rem;
+  line-height: 2rem;
+}
+
+.irregular-search {
+  font-size: 0.9rem;
+  line-height: 2rem;
+}
+
+.div-irregular-table {
+  height: 400px;
+}
+
+table {
+  width: 100%;
+}
+
+table thead th {
+  border: 1px solid #ffffff !important;
+  text-align: center;
+}
+
+table tbody tr td {
+  text-align: center;
+}
+
+.target-dayofname {
+  width: 110px;
+  text-align: center;
+}
+
+.th-fixed-base {
+  position: -webkit-sticky;
+  position: sticky;
+  left: 0;
+  background: #b0c4de !important;
+  z-index: 2;
+  text-align: center;
+}
+
+.td-fixed-base {
+  position: -webkit-sticky;
+  position: sticky;
+  left: 0;
+  background: #ffffff !important;
+  z-index: 1;
+  text-align: center;
+}
+
+.one-line {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.irregular-id-base,
+.td-irregular-id,
+.th-irregular-id {
+  width: 30px;
+}
+
+.irregular-type-base,
+.td-irregular-type,
+.th-irregular-type {
+  width: 100px;
+}
+
+.title-base,
+.td-title,
+.th-title {
+  width: 300px;
+}
+
+.depo-name-base,
+.td-depo-name,
+.th-depo-name {
+  width: 300px;
+}
+
+.trans-depo-name-base,
+.td-trans-depo-name,
+.th-trans-depo-name {
+  width: 150px;
+}
+
+.item-cd-base,
+.td-item-cd,
+.th-item-cd {
+  width: 80px;
+}
+
+.c-use-name-base,
+.td-c-use-name,
+.th-c-use-name {
+  width: 60px;
+}
+
+.is-before-deadline-undeliv-base,
+.td-is-before-deadline-undeliv,
+.th-is-before-deadline-undeliv {
+  width: 40px;
+}
+
+.is-today-deadline-undeliv-base,
+.td-is-today-deadline-undeliv,
+.th-is-today-deadline-undeliv {
+  width: 40px;
+}
+
+.time-select-base,
+.td-time-select,
+.th-time-select {
+  width: 100px;
+}
+
+.is-personal-delivery-base,
+.td-is-personal-delivery,
+.th-is-personal-delivery {
+  width: 45px;
+}
+
+.is-area-base,
+.td-is-area,
+.th-is-area {
+  width: 70px;
+}
+
+.delivery-date-base,
+.td-delivery-date,
+.th-delivery-date {
+  width: 150px;
+}
+
+.order-date-base,
+.td-order-date,
+.th-order-date {
+  width: 150px;
+}
+
+.updated-id-base,
+.td-updated-id,
+.th-updated-id {
+  width: 150px;
+}
+
+.updated-at-base,
+.td-updated-at,
+.th-updated-at {
+  width: 150px;
+}
+
+.under-line {
+  border-bottom: 1px solid #ced4da;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 5px 0 0 0;
+}
+
+.div-indent {
+  padding-left: 15px;
+  width: 100%;
+}
+

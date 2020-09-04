@@ -1,0 +1,101 @@
+@charset "UTF-8";
+
+/* 変数定義 */
+
+#tabMenu {
+  padding: 0;
+  display: flex;
+  list-style-type: none;
+}
+
+#tabMenu li {
+  width: auto;
+  padding: 10px 20px;
+  color: #4595E6;
+  border: 1px solid #4595E6;
+  background-color: white;
+  cursor: pointer;
+}
+
+#tabMenu li.active {
+  color: white;
+  background-color: #4595E6;
+  transition: 0.3s;
+}
+
+#tabMenu li.disable {
+  cursor: default;
+  color: #e9e9e9;
+  background: #cccccc;
+  border: 1px solid #cccccc;
+}
+
+.tab-calendar .row {
+  margin-right: 0px;
+  margin-left: 0px;
+}
+
+.tab-leadtime .row {
+  margin-right: 0px;
+  margin-left: 0px;
+}
+
+.tab-depo-address .row {
+  margin-right: 0px;
+  margin-left: 0px;
+}
+
+.tab-depo-item .row {
+  margin-right: 0px;
+  margin-left: 0px;
+}
+
+.default-multiple-row {
+  height: 150px;
+}
+
+.default-multiple-select {
+  height: 100% !important;
+}
+
+.default-multiple-button,
+.default-bottom-button,
+.default-top-button {
+  position: absolute;
+  width: 100px;
+  left: 50%;
+  margin-left: -50px;
+}
+
+.default-top-button {
+  top: 0px;
+}
+
+.default-bottom-button {
+  bottom: 0px;
+}
+
+table.table-hover tbody tr:hover {
+  background-color: #FFA500;
+}
+
+.under-line {
+  border-bottom: 1px solid black;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 5px -1rem 0 1rem;
+}
+
+.btn-right {
+  text-align: right;
+}
+
+.th-aria {
+  background-color: #b0c4de !important;
+}
+
+.week-div {
+  width: calc(100% / 10);
+}
+

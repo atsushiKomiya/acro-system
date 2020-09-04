@@ -1,0 +1,286 @@
+.div-calendar-table {
+  height: 400px;
+}
+
+table {
+  width: 100%;
+}
+
+table thead th {
+  border: 1px solid #ffffff !important;
+  text-align: center;
+}
+
+table tbody tr td {
+  text-align: center;
+}
+
+.target-dayofname {
+  width: 90px;
+  height: 16px;
+  text-align: center;
+}
+
+.target-dayofname2 {
+  top: 26px !important;
+}
+
+.th-fixed-base,
+.th-deponame,
+.th-tyou,
+.th-siku,
+.th-pref,
+.th-zipcode,
+.th-addrcd {
+  position: -webkit-sticky;
+  position: sticky;
+  left: 0;
+  background: #b0c4de !important;
+  z-index: 6 !important;
+  text-align: center;
+}
+
+.td-fixed-base,
+.td-deponame,
+.td-tyou,
+.td-siku,
+.td-pref,
+.td-zipcode,
+.td-addrcd {
+  position: -webkit-sticky;
+  position: sticky;
+  left: 0;
+  background: #ffffff !important;
+  z-index: 6 !important;
+  text-align: center;
+}
+
+.addrcd-base,
+.td-addrcd,
+.th-addrcd {
+  width: 60px;
+}
+
+.zipcode-base,
+.td-zipcode,
+.th-zipcode {
+  left: 60px;
+  width: 60px;
+}
+
+.pref-base,
+.td-pref,
+.th-pref {
+  left: 120px;
+  width: 40px;
+}
+
+.siku-base,
+.td-siku,
+.th-siku {
+  left: 160px;
+  width: 100px;
+}
+
+.tyou-base,
+.td-tyou,
+.th-tyou {
+  left: 260px;
+  width: 60px;
+}
+
+.deponame-base,
+.td-deponame,
+.th-deponame {
+  left: 320px;
+  width: 150px;
+}
+
+.nextday-base,
+.td-nextday,
+.th-nextday {
+  width: 80px;
+}
+
+.samedayyn-base,
+.td-samedayyn,
+.th-samedayyn {
+  width: 80px;
+}
+
+.prevdaydeadline-base,
+.td-prevdaydeadline,
+.th-prevdaydeadline {
+  width: 80px;
+}
+
+.samedaydeadline1-base,
+.td-samedaydeadline1,
+.th-samedaydeadline1 {
+  width: 80px;
+}
+
+.samedaydeadline2-base,
+.td-samedaydeadline2,
+.th-samedaydeadline2 {
+  width: 80px;
+}
+
+.mon_before_deadline_flg-base,
+.td-mon_before_deadline_flg,
+.th-mon_before_deadline_flg {
+  width: 55px;
+}
+
+.mon_today_delivery_flg-base,
+.td-mon_today_delivery_flg,
+.th-mon_today_delivery_flg {
+  width: 55px;
+}
+
+.tue_before_deadline_flg-base,
+.td-tue_before_deadline_flg,
+.th-tue_before_deadline_flg {
+  width: 55px;
+}
+
+.tue_today_delivery_flg-base,
+.td-tue_today_delivery_flg,
+.th-tue_today_delivery_flg {
+  width: 55px;
+}
+
+.wed_before_deadline_flg-base,
+.td-wed_before_deadline_flg,
+.th-wed_before_deadline_flg {
+  width: 55px;
+}
+
+.wed_today_delivery_flg-base,
+.td-wed_today_delivery_flg,
+.th-wed_today_delivery_flg {
+  width: 55px;
+}
+
+.thu_before_deadline_flg-base,
+.td-thu_before_deadline_flg,
+.th-thu_before_deadline_flg {
+  width: 55px;
+}
+
+.thu_today_delivery_flg-base,
+.td-thu_today_delivery_flg,
+.th-thu_today_delivery_flg {
+  width: 55px;
+}
+
+.fri_before_deadline_flg-base,
+.td-fri_before_deadline_flg,
+.th-fri_before_deadline_flg {
+  width: 55px;
+}
+
+.fri_today_delivery_flg-base,
+.td-fri_today_delivery_flg,
+.th-fri_today_delivery_flg {
+  width: 55px;
+}
+
+.sat_before_deadline_flg-base,
+.td-sat_before_deadline_flg,
+.th-sat_before_deadline_flg {
+  width: 55px;
+}
+
+.mon_today_delivery_flg-base,
+.th-mon_today_delivery_flg,
+.td-mon_today_delivery_flg {
+  width: 55px;
+}
+
+.sun_before_deadline_flg-base,
+.td-sun_before_deadline_flg,
+.th-sun_before_deadline_flg {
+  width: 55px;
+}
+
+.sun_today_delivery_flg-base,
+.td-sun_today_delivery_flg,
+.th-sun_today_delivery_flg {
+  width: 55px;
+}
+
+.holi_before_deadline_flg-base,
+.td-holi_before_deadline_flg,
+.th-holi_before_deadline_flg {
+  width: 55px;
+}
+
+.holi_before_today_delivery_flg-base,
+.td-holi_before_today_delivery_flg,
+.th-holi_before_today_delivery_flg {
+  width: 55px;
+}
+
+.holi_deadline_flg-base,
+.td-td-holi_deadline_flg,
+.th-td-holi_deadline_flg {
+  width: 55px;
+}
+
+.holi_today_delivery_flg-base,
+.td-holi_today_delivery_flg,
+.th-holi_today_delivery_flg {
+  width: 55px;
+}
+
+.holi_after_deadline_flg-base,
+.td-holi_after_deadline_flg,
+.th-holi_after_deadline_flg {
+  width: 55px;
+}
+
+.holi_after_today_delivery_flg-base,
+.td-holi_after_today_delivery_flg,
+.th-holi_after_today_delivery_flg {
+  width: 55px;
+}
+
+.private_home_flg-base,
+.td-private_home_flg,
+.th-private_home_flg {
+  width: 110px;
+}
+
+.congratulation_kbn_flg-base,
+.td-congratulation_kbn_flg,
+.th-congratulation_kbn_flg {
+  width: 110px;
+}
+
+.transfer_post_depo_cd-base,
+.td-transfer_post_depo_cd,
+.th-transfer_post_depo_cd {
+  width: 110px;
+}
+
+.transfer_post_deponame-base,
+.td-transfer_post_deponame,
+.th-transfer_post_deponame {
+  width: 110px;
+}
+
+.depo_lead_time-base,
+.td-depo_lead_time,
+.th-depo_lead_time {
+  width: 110px;
+}
+
+.under-line {
+  border-bottom: 1px solid black;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  margin: 0 -1rem 0 1rem;
+}
+

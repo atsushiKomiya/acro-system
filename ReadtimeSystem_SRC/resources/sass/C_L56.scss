@@ -1,0 +1,30 @@
+.under-line {
+  border-bottom: 1px solid black;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.count {
+  text-align: right;
+}
+
+.message-table {
+  background-color: #ffffff;
+}
+
+.th-id {
+  width: 5%;
+}
+
+.th-date-type {
+  width: 15%;
+}
+
+.th-message {
+  width: 50%;
+}
+
+.th-error-message {
+  width: 30%;
+}

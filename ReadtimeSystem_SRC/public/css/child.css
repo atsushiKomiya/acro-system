@@ -1,0 +1,39 @@
+@charset "UTF-8";
+
+table.table-hover tbody tr:hover {
+  background-color: #FFA500;
+}
+
+.sticky-table table thead tr {
+  z-index: 5;
+}
+
+.sticky-table table thead tr th.t-check {
+  width: 5%;
+}
+
+.sticky-table table thead tr th.t-depo {
+  width: 80%;
+}
+
+.sticky-table table thead tr th.t-pref {
+  width: 15%;
+}
+
+/* チラつき防止 */
+
+.sticky-table table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+.sticky-table td,
+th {
+  border: 1px solid #e8e8e8;
+}
+
+.sticky-table table thead tr th {
+  z-index: 5;
+  border-top: 0 !important;
+}
+

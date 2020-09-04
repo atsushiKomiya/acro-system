@@ -1,0 +1,172 @@
+$th-fixed-bgcolor: #b0c4de;
+$td-fixed-bgcolor: #ffffff;
+$td-is-not-approval-bgcolor: #E5C1A7;
+$td-entertainment-bgcolor: #808080;
+$td-surprise-bgcolor: #808080;
+
+.div-calendar-table {
+    height: 400px;
+}
+
+table {
+    width: 100%;
+}
+
+table thead th {
+    border:1px solid #ffffff !important;
+}
+
+table tbody tr td {
+    background: $td-fixed-bgcolor !important;
+    word-break: break-all;
+}
+
+
+.target-date {
+    width: 95px;
+    text-align: center;
+}
+
+.th-fixed-base{
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    background: $th-fixed-bgcolor !important;
+    z-index: 6 !important;
+    text-align: center;
+}
+
+.td-fixed-base{
+    position: -webkit-sticky;
+    position: sticky;
+    left: 0;
+    background: $td-fixed-bgcolor !important;
+    z-index: 6 !important;
+    text-align: center;
+}
+
+// デポ名
+.depo-base {
+    width: 150px;
+}
+
+.th-depo {
+    @extend .th-fixed-base;
+    @extend .depo-base;
+}
+
+.td-depo {
+    @extend .td-fixed-base;
+    @extend .depo-base;
+}
+
+// 都道府県
+.pref-base {
+    left: 150px;
+    width: 45px;
+}
+
+.th-pref {
+    @extend .th-fixed-base;
+    @extend .pref-base;
+}
+
+.td-pref {
+    @extend .td-fixed-base;
+    @extend .pref-base;
+}
+
+// 承認 上部
+.approval-top-base {
+    left: 195px;
+    width: 205px;
+}
+
+.th-approval {
+    @extend .th-fixed-base;
+    @extend .approval-top-base;
+}
+
+// 承認 - 承認
+.approval-first-base {
+    left: 195px;
+    width: 45px;
+}
+
+.th-approval-first {
+    @extend .th-fixed-base;
+    @extend .approval-first-base;
+}
+
+.td-approval-first {
+    @extend .td-fixed-base;
+    @extend .approval-first-base;
+}
+
+// 承認 - 日付
+.approval-second-base {
+    left: 240px;
+    width: 80px;
+}
+
+.th-approval-second {
+    @extend .th-fixed-base;
+    @extend .approval-second-base;
+}
+
+.td-approval-second {
+    @extend .td-fixed-base;
+    @extend .approval-second-base;
+}
+// 承認 - 承認者
+.approval-serde-base {
+    left: 320px;
+    width: 80px;
+}
+
+.th-approval-serde {
+    @extend .th-fixed-base;
+    @extend .approval-serde-base;
+}
+
+.td-approval-serde {
+    @extend .td-fixed-base;
+    @extend .approval-serde-base;
+}
+
+// 確認
+.confirm-base {
+    left: 400px;
+    width: 45px;
+}
+
+.th-confirm {
+    @extend .th-fixed-base;
+    @extend .confirm-base;
+}
+
+.td-confirm {
+    @extend .td-fixed-base;
+    @extend .confirm-base;
+}
+
+.tr-is-not-approval {
+    td {
+        background: $td-is-not-approval-bgcolor !important;
+    }
+    .td-entertainment {
+        background: $td-entertainment-bgcolor !important;
+    }
+    
+    .td-surprise {
+        background: $td-surprise-bgcolor !important;
+    }
+}
+
+.td-entertainment {
+    background: $td-entertainment-bgcolor !important;
+}
+
+.td-surprise {
+    background: $td-surprise-bgcolor !important;
+}

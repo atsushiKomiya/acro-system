@@ -1,0 +1,45 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'yaml'
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+
+VAGRANTFILE_DIR = File.dirname(__FILE__)
+
+Vagrant.configure(2) do |config|
+
+  config.vm.box = "centos/7"
+
+  config.vm.define 'Sagawa_Logi_Improve' do |machine|
+    machine.vm.hostname = 'leadtime.keicho.net'
+    machine.vm.network "private_network", ip: "192.168.4.11"
+    
+    # forwarded_port
+    machine.vm.network "forwarded_port", id: "ssh", guest: 22, host: 2230
+    machine.vm.network "forwarded_port", id: "http", guest: 8081, host: 8081
+    machine.vm.network "forwarded_port", id: "pgadmin4", guest: 8082, host: 8082
+    machine.vm.network "forwarded_port", id: "postgresql", guest: 5432, host: 5432
+    machine.vm.network "forwarded_port", id: "xdebug", guest: 9001, host: 9001
+
+    # virtualbox
+    machine.vm.provider "virtualbox" do |vb|
+      vb.name = 'leadtime.keicho.net'
+      vb.memory = 1024
+      vb.cpus = 2
+      vb.customize ["setextradata", :id, "VBoxInternal2/SharedFoldersEnableSymlinksCreate/.","1"]
+    end
+
+    # synced_folder
+    machine.vm.synced_folder ".", "/vagrant", type: "nfs"
+
+    # docker-compose up
+    machine.vm.provision :docker, run: "always"
+    machine.vm.provision :docker_compose, yml: "/vagrant/docker-compose.yml", rebuild: false, run: "always"
+
+  end
+
+end
