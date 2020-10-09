@@ -133,8 +133,6 @@ class BaseCsvExportUseCase
     private function makeCsv($csvTypeName, $cursors, $fullname, $headerCallback = null, $dataCallback = null)
     {
         $createCsvFile = fopen($fullname, 'w');
-        // fwrite($createCsvFile, "\xEF\xBB\xBF");
-        // stream_filter_prepend($createCsvFile,'convert.iconv.utf-8/cp932');
         if (is_null($headerCallback)) {
             $columns = $this->getColumns($csvTypeName);
             $headers = $this->getHeaders($csvTypeName);
@@ -156,29 +154,20 @@ class BaseCsvExportUseCase
 
         // header作成
         if ($headers != null) {
-            // foreach ($headers as $key => $val) {
-            //     $headers[$key] = mb_convert_encoding($val, "SJIS", mb_detect_encoding($val));
-            // }
-            // $headerLine = $this->toCsvHeader($headers);
-            // fputs($createCsvFile, $headerLine);
-            fputcsv($createCsvFile, $headers);
+            $headerLine = $this->toCsvHeader($headers);
+            fputs($createCsvFile, $headerLine);
         }
 
-        // foreach ($cursors as $cursor) {
-        //     // 独自加工がある場合
-        //     $model = is_null($dataCallback) ? $cursor : \call_user_func($dataCallback, $cursor);
-        //     $csv = [];
-        //     foreach ($columns as $col) {
-        //         $test = mb_detect_encoding($model[$col]);
-        //         $csv[] = $model[$col];
-        //         // $data = $model[$col];
-        //         // $data = mb_convert_encoding($data, "SJIS", mb_detect_encoding($data));
-        //         // $csv[] = $data;
-        //     }
-        //     // $line = $this->toCsv($csv, $options);
-        //     // \fputs($createCsvFile, $line);
-        //     fputcsv($createCsvFile, $csv);
-        // }
+        foreach ($cursors as $cursor) {
+            // 独自加工がある場合
+            $model = is_null($dataCallback) ? $cursor : \call_user_func($dataCallback, $cursor);
+            $csv = [];
+            foreach ($columns as $col) {
+                $csv[] = $model[$col];
+            }
+            $line = $this->toCsv($csv, $options);
+            \fputs($createCsvFile, $line);
+        }
 
         fclose($createCsvFile);
     }
