@@ -15,6 +15,7 @@ class UpdateDepoCalInfoTmpForDepoCalTmpIdIncrementsTable extends Migration
     public function up()
     {
 
+        DB::statement("DROP SEQUENCE IF EXISTS depo_cal_info_tmp_depo_cal_tmp_id_seq;");
         Schema::table('depo_cal_info_tmp', function (Blueprint $table) {
             // カラム定義
             $table->increments('depo_cal_tmp_id')->change();

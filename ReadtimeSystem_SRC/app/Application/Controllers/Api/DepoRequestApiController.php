@@ -5,7 +5,6 @@ namespace App\Application\Controllers\Api;
 use App\Application\Requests\DepoApplicationRequest;
 use App\Application\Requests\DepoApprovalRequest;
 use App\Application\Requests\DepoConfirmRequest;
-use App\Application\Requests\DepoRequestRequest;
 use App\Application\Responses\Api\BaseApiResponse;
 use App\Application\UseCases\DepoCalInfoTmpUseCase;
 use App\Application\UseCases\DepoCalAprInfoUseCase;
@@ -105,7 +104,7 @@ class DepoRequestApiController extends ApiController
     /**
      * デポ休業承認
      *
-     * @param DepoRequestRequest $request
+     * @param DepoApprovalRequest $request
      * @param DepoCalInfoTmpUseCase $depoCalInfoTmpUsecase
      * @param DepoCalAprInfoUsecase $depoCalAprInfoUsecase
      * @param DepoCalInfoUsecase $depoCalInfoUsecase
@@ -142,7 +141,7 @@ class DepoRequestApiController extends ApiController
             $from = $carbon->firstOfMonth()->format('Ymd');
             $to = $carbon->endOfMonth()->format('Ymd');
 
-            $orderCsvExpUsecase->chgDepoInfoCsv($depoCdList, null, null, $from, $to);
+            $orderCsvExpUsecase->chgDepoInfoCsv($depoCdList, null, null, $from, $to, null);
 
             // コミット
             DB::commit();

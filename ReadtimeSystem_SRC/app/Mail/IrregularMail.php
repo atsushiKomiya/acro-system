@@ -87,7 +87,15 @@ class IrregularMail extends Mailable
         // 商品
         $irregularItemListStr = collect($this->irregularMailEntity->irregularItemList)
         ->map(function ($item) {
-            return '【' . $item->itemCd . '】 ' . $item->itemName;
+            $str = '';
+            if ($item->itemCd) {
+                $str = '【' . $item->itemCd . '】 ' . $item->itemName;
+            } elseif ($item->itemCategoryMediumCd) {
+                $str = '【' . $item->itemCategoryMediumCd . '】 ' . $item->itemCategoryMediumName;
+            } elseif ($item->itemCategoryLargeCd) {
+                $str = '【' . $item->itemCategoryLargeCd . '】 ' . $item->itemCategoryLargeName;
+            }
+            return $str;
         })->implode(',');
         // 地域
         $irregularAreaListStr = collect($this->irregularMailEntity->irregularAreaList)

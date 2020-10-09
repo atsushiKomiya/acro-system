@@ -5,7 +5,7 @@
 @endsection
  
 @include('layout.header')
- 
+
 @section('content')
   <defaultlist
   :pref-list='@json($prefList)'

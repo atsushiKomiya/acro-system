@@ -18,13 +18,13 @@
         <div class="col-md-3 form-inline">
           <div class="col-md-6" style="vertical-align: middle">デポ名</div>
           <div class="col-md-6">
-            <button type="button" class="btn btn-primary" @click="depolistOpen">デポ選択</button>
+            <button type="button" class="btn btn-primary" @click="depolistOpen" v-bind:disabled="!mSearchIsActive">デポ選択</button>
           </div>
         </div>
         <div class="col-md-3 form-inline">
           <div class="col-md-6" style="vertical-align: middle">商品</div>
           <div class="col-md-6">
-            <button type="button" class="btn btn-primary" @click="productlistOpen">選択</button>
+            <button type="button" class="btn btn-primary" @click="productlistOpen" v-bind:disabled="!mSearchIsActive">選択</button>
           </div>
         </div>
         <div class="col-md-3 form-inline">
@@ -54,8 +54,8 @@
       <div class="row">
         <div class="col-md-6"></div>
         <div class="col-md-6 text-right">
-          <button type="button" class="btn btn-primary" @click="downloadSetup">CSV出力</button>
-          <button type="button" class="btn btn-primary ml-4 mr-4" @click="reset">リセット</button>
+          <button type="button" class="btn btn-primary" @click="downloadSetup" v-bind:disabled="!mSearchIsActive">CSV出力</button>
+          <button type="button" class="btn btn-primary ml-4 mr-4" @click="reset" v-bind:disabled="!mSearchIsActive">リセット</button>
           <button type="button" class="btn btn-primary" @click="search" v-bind:disabled="!mSearchIsActive">検索</button>
         </div>
       </div>
@@ -73,139 +73,272 @@
           <label class="control-label">件</label>
         </div>
       </div>
-      <template v-if="searchCountComputed != 0">
-        <div class="sticky-table div-calendar-table">
-          <table class="table-striped table-responsive-stack">
-            <thead>
-              <tr>
-                <th class="th-addrcd" rowspan="2">住所<br/>コード</th>
-                <th class="th-zipcode" rowspan="2">郵便番号</th>
-                <th class="th-pref" rowspan="2">都道<br/>府県</th>
-                <th class="th-siku" rowspan="2">市区群</th>
-                <th class="th-tyou" rowspan="2">町名</th>
-                <th class="th-deponame" rowspan="2">デポ名</th>
-                <th class="th-nextday" rowspan="2">翌日<br />時間指定</th>
-                <th class="th-samedayyn" rowspan="2">当日配送<br />可否</th>
-                <th class="th-prevdaydeadline" rowspan="2">翌日締切<br />時間</th>
-                <th class="th-samedaydeadline1" rowspan="2">当日配送<br />締切時間<br />1</th>
-                <th class="th-samedaydeadline2" rowspan="2">当日配送<br />締切時間<br />2</th>
-                <!-- ここからループ -->
-                <th
-                  class="target-dayofname"
+      <div class="sticky-table div-calendar-table">
+        <c-grid
+          :data="mDefaultList"
+          :frozen-col-count="6"
+          :theme="userTheme"
+        >
+
+          <template slot="layout-header">
+            <c-grid-layout-row>
+              <c-grid-header
+                width="60" rowspan="2"
+              >
+              住所コード
+              </c-grid-header>
+              <c-grid-header width="60" rowspan="2">
+                郵便番号
+              </c-grid-header>
+              <c-grid-header width="60" rowspan="2">
+                都道府県
+              </c-grid-header>
+              <c-grid-header width="100" rowspan="2">
+                市区郡
+              </c-grid-header>
+              <c-grid-header width="80" rowspan="2">
+                町名
+              </c-grid-header>
+              <c-grid-header width="150" rowspan="2">
+                デポ名
+              </c-grid-header>
+
+              <c-grid-header
+                :headerStyle="{textAlign: 'center'}"
+                width="80" rowspan="2"
+              >
+                翌日時間指定
+              </c-grid-header>
+              <c-grid-header
+                :headerStyle="{textAlign: 'center'}"
+                width="80" rowspan="2"
+              >
+                当日配達可否
+              </c-grid-header>
+              <c-grid-header
+                :headerStyle="{textAlign: 'center'}"
+                width="80" rowspan="2"
+              >
+                翌日締切時間
+              </c-grid-header>
+              <c-grid-header
+                :headerStyle="{textAlign: 'center'}"
+                width="100" rowspan="2"
+              >
+                当日配送締切時間1
+              </c-grid-header>
+              <c-grid-header
+                :headerStyle="{textAlign: 'center'}"
+                width="100" rowspan="2"
+              >
+                当日配送締切時間2
+              </c-grid-header>
+              <template v-for="(list, i) in nameList">
+                <c-grid-header
+                  :headerStyle="{textAlign: 'center'}"
                   colspan="2"
-                  v-for="model in dayOfWeekNameComputed"
-                  :key="model.key"
-                  :class="{ 'bg-holiday' : model.isHoliday }"
-                >{{ model.name }}</th>
-                <th class="th-private_home_flg" rowspan="2">個人宅可否</th>
-                <th class="th-congratulation_kbn_flg" rowspan="2">慶弔区分</th>
-                <th class="th-transfer_post_depo_cd" rowspan="2">振替先郵便デポ</th>
-                <th class="th-transfer_post_deponame" rowspan="2">振替先郵便デポ名</th>
-                <th class="th-depo_lead_time" rowspan="2">デポリードタイム</th>
-              </tr>
-              <tr>
-                <!-- ここからループ -->
-                <template v-for="model in dayOfWeekNameComputed">
-                  <th class="target-dayofname2" :key="model.name + '_before'" :class="{ 'bg-holiday' : model.isHoliday }">
-                    前日
-                    <br />締切
-                  </th>
-                  <th class="target-dayofname2" :key="model.name + '_today'" :class="{ 'bg-holiday' : model.isHoliday }">
-                    当日
-                    <br />配送
-                  </th>
-                </template>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="(model, index) in mDefaultList" :key="index">
-                <td class="td-addrcd">{{ model.addrcd }}</td>
-                <td class="td-zipcode">{{ model.zipcode }}</td>
-                <td class="td-pref">{{ model.pref }}</td>
-                <td class="td-siku">{{ model.siku }}</td>
-                <td class="td-tyou">{{ model.tyou }}</td>
-                <td class="td-deponame"><a @click="depoLink(model)" href="#">{{ model.deponame1 }}</a></td>
-                <td class="td-nextday">{{ timeSelectTrans(model.next_day_time_type) }}</td>
-                <td class="td-samedayyn">
-                  {{ dispRoundCross(model.is_area_today_delivery_flg) }}
-                </td>
-                <td class="td-prevdaydeadline">{{ deadlineSelectTrans(model.next_day_time_deadline) }}</td>
-                <td class="td-samedaydeadline1">{{ deadlineSelectTrans(model.today_time_deadline1) }}</td>
-                <td class="td-samedaydeadline2">{{ deadlineSelectTrans(model.today_time_deadline2) }}</td>
-                <td class="td-mon_before_deadline_flg">
-                  {{ dispRoundCross(model.mon_before_deadline_flg) }}
-                </td>
-                <td class="td-mon_today_delivery_flg">
-                  {{ dispRoundCross(model.mon_today_delivery_flg) }}
-                </td>
-                <td class="td-tue_before_deadline_flg">
-                  {{ dispRoundCross(model.tue_before_deadline_flg) }}
-                </td>
-                <td class="td-tue_today_delivery_flg">
-                  {{ dispRoundCross(model.tue_today_delivery_flg) }}
-                </td>
-                <td class="td-wed_before_deadline_flg">
-                  {{ dispRoundCross(model.wed_before_deadline_flg) }}
-                </td>
-                <td class="td-wed_today_delivery_flg">
-                  {{ dispRoundCross(model.wed_today_delivery_flg) }}
-                </td>
-                <td class="td-thu_before_deadline_flg">
-                  {{ dispRoundCross(model.thu_before_deadline_flg) }}
-                </td>
-                <td class="td-thu_today_delivery_flg">
-                  {{ dispRoundCross(model.thu_today_delivery_flg) }}
-                </td>
-                <td class="td-fri_before_deadline_flg">
-                  {{ dispRoundCross(model.fri_before_deadline_flg) }}
-                </td>
-                <td class="td-fri_today_delivery_flg">
-                  {{ dispRoundCross(model.fri_today_delivery_flg) }}
-                </td>
-                <td class="td-sat_before_deadline_flg">
-                  {{ dispRoundCross(model.sat_before_deadline_flg) }}
-                </td>
-                <td class="td-sat_today_delivery_flg">
-                  {{ dispRoundCross(model.sat_today_delivery_flg) }}
-                </td>
-                <td class="td-sun_before_deadline_flg">
-                  {{ dispRoundCross(model.sun_before_deadline_flg) }}
-                </td>
-                <td class="td-sun_today_delivery_flg">
-                  {{ dispRoundCross(model.sun_today_delivery_flg) }}
-                </td>
-                <td class="td-holi_before_deadline_flg">
-                  {{ dispRoundCross(model.holi_before_deadline_flg) }}
-                </td>
-                <td class="td-holi_before_today_delivery_flg">
-                  {{ dispRoundCross(model.holi_before_today_delivery_flg) }}
-                </td>
-                <td class="td-holi_deadline_flg">
-                  {{ dispRoundCross(model.holi_deadline_flg) }}
-                </td>
-                <td class="td-holi_today_delivery_flg">
-                  {{ dispRoundCross(model.holi_today_delivery_flg) }}
-                </td>
-                <td class="td-holi_after_deadline_flg">
-                  {{ dispRoundCross(model.holi_after_deadline_flg) }}
-                  </td>
-                <td class="td-holi_after_today_delivery_flg">
-                  {{ dispRoundCross(model.holi_after_today_delivery_flg) }}
-                </td>
-                <td class="td-private_home_flg">
-                  {{ dispRoundCross(model.private_home_flg) }}
-                </td>
-                <td class="td-congratulation_kbn_flg">
-                  {{ keichoKbn(mKeichoTypeList, model.congratulation_kbn_flg) }}
-                </td>
-                <td class="td-transfer_post_depo_cd">{{ model.transfer_post_depo_cd }}</td>
-                <td class="td-transfer_post_deponame">{{ model.deponame2 }}</td>
-                <td class="td-depo_lead_time">{{ model.depo_lead_time }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </template>
+                  :key="list[0] + i"
+                >
+                  {{  list[1] }}
+                </c-grid-header>
+              </template>
+              <c-grid-header
+                :headerStyle="{textAlign: 'center'}"
+                rowspan="2"
+              >
+                個人宅可否
+              </c-grid-header>
+              <c-grid-header
+                :headerStyle="{textAlign: 'center'}"
+                width="100" rowspan="2"
+              >
+                手持ちお届け可否
+              </c-grid-header>
+              <c-grid-header
+                :headerStyle="{textAlign: 'center'}"
+                rowspan="2"
+              >
+                慶弔区分
+              </c-grid-header>
+              <c-grid-header
+                :headerStyle="{textAlign: 'center'}"
+                rowspan="2"
+              >
+                振替先郵便デポ
+              </c-grid-header>
+              <c-grid-header
+                :headerStyle="{textAlign: 'center'}"
+                width="100" rowspan="2"
+              >
+                振替先郵便デポ名
+              </c-grid-header>
+              <c-grid-header
+                :headerStyle="{textAlign: 'center'}"
+                width="100" rowspan="2"
+              >
+                デポリードタイム
+              </c-grid-header>
+            </c-grid-layout-row>
+            <c-grid-layout-row>
+              <template v-for="list of nameList" >
+                <c-grid-header
+                  :headerStyle="{textAlign: 'center'}"
+                  width="50" :key="'before_' + list[0]"
+                >
+                  前日締切
+                </c-grid-header>
+                <c-grid-header
+                  :headerStyle="{textAlign: 'center'}"
+                  width="50" :key="'today_' + list[0]"
+                >
+                  当日締切
+                </c-grid-header>
+              </template>
+            </c-grid-layout-row>
+
+          </template>
+
+          <template slot="layout-body">
+            <c-grid-layout-row>
+              <c-grid-column field="addrcd" />
+              <c-grid-column field="zipcode" />
+              <c-grid-column field="pref" />
+              <c-grid-column field="siku" />
+              <c-grid-column field="tyou" />
+              <c-grid-column
+                :columnStyle="{color: '#3490dc'}"
+                field="deponame1"
+                @click-cell="depoLink($event)"
+              />
+
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="timeSelectTrans"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCross"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="getNextDayTimeDeadlineTrans"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="getTodayTimeDeadline1Trans"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="getTodayTimeDeadline2Trans"
+              />
+
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForMonDeadline"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForMonDelivery"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForTueDeadline"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForTueDelivery"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForWedDeadline"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForWedDelivery"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForThuDeadline"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForThuDelivery"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForFriDeadline"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForFriDelivery"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForSatDeadline"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForSatDelivery"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForSunDeadline"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForSunDelivery"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForHoliBeforeDeadline"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForHoliBeforeTodayDelivery"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForHoliDeadline"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForHoliTodayDelivery"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForHoliAfterDeadline"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForHoliAfterTodayDelivery"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForPrivateHome"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="dispRoundCrossForHanding"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                :field="keichoKbn"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                field="transfer_post_depo_cd"
+              />
+              <c-grid-column
+                field="deponame2"
+              />
+              <c-grid-column
+                :columnStyle="{textAlign: 'center'}"
+                field="depo_lead_time"
+              />
+            </c-grid-layout-row>
+          </template>
+        </c-grid>
+      </div>
     </div>
   </div>
 </template>
@@ -222,12 +355,12 @@ export default {
     prefList: Object,
     timeSelectList: Object,
     keichoTypeList: Array,
-    deadlineTimeList: Object
+    deadlineTimeList: Object,
   },
   data: function() {
     return {
       mIsSearch: false,
-      mSearchParam: this.searchParam
+      mSearchParam: this.searchParam.searchDepocd !== null
         ? this.searchParam
         : {
             searchPrefCd: 99,
@@ -244,8 +377,54 @@ export default {
       mKeichoTypeList: this.keichoTypeList,
       mDefaultList: [],
       mDefaultListCount: 0,
-      mSearchIsActive: false
+      mSearchIsActive: false,
+      columnTheme: {
+        font: '20rem',
+      },
+      nameList: [
+        ["monday", "月", false], 
+        ["tuesday", "火", false],
+        ["wednesday", "水", false],
+        ["thursday", "木", false],
+        ["friday", "金", false],
+        ["saturday", "土", false],
+        ["sunday", "日", true],
+        ["beforePublicHoliday", "祝前", false],
+        ["publicHoliday", "祝日", true],
+        ["afterPublicHoliday", "祝後", false]
+      ],
+      userTheme: {
+        color: 'black',
+        borderColor: '#35495e',
+        frozenRowsBgColor(args) {
+          const { row, grid: {frozenRowColor} } = args;
+          if (args.col >= 6 && args.row <= 1) {
+            if (
+              (args.col == 23 || args.col == 24) // 日
+              || (args.col == 27 || args.col == 28) // 祝日
+            ) {
+              return '#FFA500';
+            } else {
+              return '#84D383'
+            }
+          } else {
+            return '#b0c4de';
+          }
+        },
+        font: '0.75rem',
+      }
     };
+  },
+  mounted: function () {
+    // デフォルト設定でデポを選択後に「一覧」から遷移してきた場合
+    if (this.searchParam.searchDepocd !== null) {
+      // デポ選択を予め設定
+      var depo = {
+        'depocd': this.searchParam.searchDepocd,
+        'deponame': this.searchParam.searchDeponame
+      }
+      this.searchDepoRegist(depo);
+    }
   },
   methods: {
     reset: function() {
@@ -277,7 +456,32 @@ export default {
           this.mIsSearch = true;
           this.mDefaultListCount = result.data.length;
           // 100アイテムづつsetTimeoutでレンダリング
-          this.betterRender('mDefaultList',result.data);
+          // this.betterRender('mDefaultList',result.data);
+          this.mDefaultList = result.data;
+        } else {
+          alert(result.message);
+        }
+      }).catch(error => {
+        var data = error.response.data;
+        alert(data.message)
+      }).finally(() => {
+        this.$root.$refs.appProgress.busy(false);
+      });
+    },
+    count: async function(e) {
+      // 検索
+      this.$root.$refs.appProgress.busy(true);
+      await Repository.countDefaultList(
+        this.mSearchParam.searchPrefCd,
+        this.mSearchParam.searchDepocd,
+        this.mSearchParam.searchItemCategoryLargecd,
+        this.mSearchParam.searchItemCategoryMediumcd,
+        this.mSearchParam.searchItemCd,
+        this.mSearchParam.searchIsConfig
+      ).then(response => {
+        var result = response.data;
+        if(result.isSuccess) {
+          this.mDefaultListCount = result.data;
         } else {
           alert(result.message);
         }
@@ -289,31 +493,36 @@ export default {
       });
     },
     /** ダウンロード前準備 */
-    downloadSetup: function(e) {
+    downloadSetup: async function(e) {
+      await this.count();
       if(this.mDefaultListCount == 0) {
         alert('検索結果が0件のため、ダウンロードできません。');
         return false;
       }
       var fileName = "DefaultList";
       var request = {
-        'pref': this.mSearchParam.searchPrefCd,
+        'prefCd': this.mSearchParam.searchPrefCd,
         'itemCategoryLargecd': this.mSearchParam.searchItemCategoryLargecd,
         'itemCategoryMediumcd': this.mSearchParam.searchItemCategoryMediumcd,
-        'depocd': this.mSearchParam.searchDepocd,
-        'itemcd': this.mSearchParam.searchItemCd,
+        'depoCd': this.mSearchParam.searchDepocd,
+        'itemCd': this.mSearchParam.searchItemCd,
         'isConfig': this.mSearchParam.searchIsConfig,
       };
       var url = Repository.downloadDefaultListUrl();
       this.download(fileName,request,url);
     },
     /** デポ名リンク */
-    depoLink: function(model) {
-      // デポ変更申請へ遷移
-      this.$root.$refs.appProgress.busy(true);
-      location.href = this.$root.URL_CONST.C_L21 + '/search?searchDepocd=' + model.depo_cd;
+    depoLink: function (rec) {
+      var row = rec.row - 2;
+      var depo_cd = this.mDefaultList[row].depo_cd;
+      if(depo_cd != null) {
+        this.$root.$refs.appProgress.busy(true);
+        location.href = this.$root.URL_CONST.C_L21 + '/search?searchDepocd=' + depo_cd;
+      }
     },
-    keichoKbn: function(mKeichoTypeList, congratulation_kbn_flg) {
-      var result = mKeichoTypeList.filter(function(keicho){
+    keichoKbn: function(data) {
+      var congratulation_kbn_flg = data.congratulation_kbn_flg;
+      var result = this.mKeichoTypeList.filter(function(keicho){
         return keicho.type == congratulation_kbn_flg;
       });
       if (result.length == 0){
@@ -325,7 +534,7 @@ export default {
       childWinOpen(this.$root.URL_CONST.C_L50, undefined, this.searchDepoRegist);
     },
     searchDepoRegist: function(depo) {
-     this.mSearchParam.searchDepocd = depo.depocd;
+      this.mSearchParam.searchDepocd = depo.depocd;
       this.mSearchParam.searchDeponame = depo.deponame;
     },
     productlistOpen: function() {
@@ -341,24 +550,260 @@ export default {
       this.mSearchParam.searchItemName = searchItemName;
       this.$forceUpdate();
     },
-    timeSelectTrans: function(date) {
-      if(date === null) return '';
-      var returnDate = this.timeSelectList[date];
+    timeSelectTrans: function(data) {
+      var nextDayTimeDeadline = data.next_day_time_type;
+      if(nextDayTimeDeadline === NaN) return '';
+      var returnDate = this.timeSelectList[nextDayTimeDeadline];
       return returnDate;
     },
-    deadlineSelectTrans: function(date) {
+    getNextDayTimeDeadlineTrans: function(data) {
+      var nextDayTimeDeadline = data.next_day_time_deadline;
+      if(nextDayTimeDeadline === null) return '';
+      var returnDate = this.deadlineTimeList[nextDayTimeDeadline];
+      return returnDate;
+    },
+    getTodayTimeDeadline1Trans: function(data) {
+      var date = data.today_time_deadline1;
       if(date === null) return '';
       var returnDate = this.deadlineTimeList[date];
       return returnDate;
     },
-    dispRoundCross: function(isFlg) {
+    getTodayTimeDeadline2Trans: function(data) {
+      var date = data.today_time_deadline2;
+      if(date === null) return '';
+      var returnDate = this.deadlineTimeList[date];
+      return returnDate;
+    },
+    dispRoundCross: function(data) {
+      var isFlg = data.is_area_today_delivery_flg;
       var ret = '';
       if(isFlg == null) {
         ret = '';
       } else {
         ret = isFlg ? '○' : '×';
       }
-    }
+      return ret;
+    },
+    dispRoundCrossForMonDeadline: function(data) {
+      var isFlg = data.mon_before_deadline_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForMonDelivery: function(data) {
+      var isFlg = data.mon_today_delivery_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForTueDeadline: function(data) {
+      var isFlg = data.tue_before_deadline_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForTueDelivery: function(data) {
+      var isFlg = data.tue_today_delivery_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForWedDeadline: function(data) {
+      var isFlg = data.wed_before_deadline_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForWedDelivery: function(data) {
+      var isFlg = data.wed_today_delivery_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForThuDeadline: function(data) {
+      var isFlg = data.thu_before_deadline_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForThuDelivery: function(data) {
+      var isFlg = data.thu_today_delivery_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForFriDeadline: function(data) {
+      var isFlg = data.fri_before_deadline_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForFriDelivery: function(data) {
+      var isFlg = data.fri_today_delivery_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForSatDeadline: function(data) {
+      var isFlg = data.sat_before_deadline_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForSatDelivery: function(data) {
+      var isFlg = data.sat_today_delivery_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForSunDeadline: function(data) {
+      var isFlg = data.sun_before_deadline_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForSunDelivery: function(data) {
+      var isFlg = data.sun_today_delivery_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForHoliBeforeDeadline: function(data) {
+      var isFlg = data.holi_deadline_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForHoliBeforeTodayDelivery: function(data) {
+      var isFlg = data.holi_before_today_delivery_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForHoliDeadline: function(data) {
+      var isFlg = data.holi_deadline_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForHoliTodayDelivery: function(data) {
+      var isFlg = data.holi_today_delivery_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForHoliAfterDeadline: function(data) {
+      var isFlg = data.holi_after_deadline_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForHoliAfterTodayDelivery: function(data) {
+      var isFlg = data.holi_after_today_delivery_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForPrivateHome: function(data) {
+      var isFlg = data.private_home_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
+    dispRoundCrossForHanding: function(data) {
+      var isFlg = data.handing_flg;
+      var ret = '';
+      if(isFlg == null) {
+        ret = '';
+      } else {
+        ret = isFlg ? '○' : '×';
+      }
+      return ret;
+    },
   },
   computed: {
     searchCountComputed: function() {
@@ -366,23 +811,11 @@ export default {
     },
     dayOfWeekNameComputed: function() {
       var dispDayNameList = Array();
-      var nameList = [
-        ["monday", "月", false], 
-        ["tuesday", "火", false],
-        ["wednesday", "水", false],
-        ["thursday", "木", false],
-        ["friday", "金", false],
-        ["saturday", "土", false],
-        ["sunday", "日", true],
-        ["beforePublicHoliday", "祝前", false],
-        ["publicHoliday", "祝日", true],
-        ["afterPublicHoliday", "祝後", false]
-      ];
-      for (var i = 0;i < nameList.length; i++){
+      for (var i = 0;i < this.nameList.length; i++){
         var obj = {
-          key: nameList[i][0],
-          name: nameList[i][1],
-          isHoliday: nameList[i][2],
+          key: this.nameList[i][0],
+          name: this.nameList[i][1],
+          isHoliday: this.nameList[i][2],
         }
         dispDayNameList.push(obj);
       }
@@ -394,7 +827,7 @@ export default {
       handler: function (val, oldVal) {
         var flg = true;
         // 都道府県
-        if(!this.mSearchParam.searchPrefCd == 99) {
+        if(this.mSearchParam.searchPrefCd == "99") {
           flg = false;
         }
         // ボタン活性／非活性判定

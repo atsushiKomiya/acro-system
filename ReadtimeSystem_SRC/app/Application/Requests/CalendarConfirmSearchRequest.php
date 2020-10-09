@@ -2,20 +2,15 @@
 
 namespace App\Application\Requests;
 
+use App\Infrastructure\Traits\ShainOnlyRequest;
+
 /**
  * デポ稼働確認検索リクエスト
  */
 class CalendarConfirmSearchRequest extends ApiRequest
 {
-    /**
-     * 認証有無
-     *
-     * @return boolean
-     */
-    public function authorize()
-    {
-        return true;
-    }
+    /** 社員のみ実行可能 */
+    use ShainOnlyRequest;
 
     /**
      * バリデーション

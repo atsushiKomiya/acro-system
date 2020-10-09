@@ -30,7 +30,7 @@ class DefaultListApiController extends ApiController
         // 全県対応（12万件以上を一時的に扱う可能性があるため）
         ini_set('memory_limit', '1024M');
         // CSVダウンロード　全県対応
-        ini_set('max_execution_time', 600);
+        ini_set('max_execution_time', 0);
     }
 
     /**
@@ -64,8 +64,39 @@ class DefaultListApiController extends ApiController
             $res->apiServerError(500, Lang::get('error.C_L11.search'));
         }
         return $res;
+    }
 
+    /**
+     * デフォルト一覧件数取得
+     *
+     * @param DefaultListSearchRequest $request
+     * @param DepoDefaultListUseCase $depoDefaultListUseCase
+     * @return void
+     */
+    public function count(
+        DefaultListSearchRequest $request,
+        DepoDefaultListUseCase $depoDefaultListUseCase
+    )
+    {
+        $prefCd = $request->prefCd;
+        $depoCd = $request->depoCd;
+        $itemCategoryLargecd = $request->itemCategoryLargecd;
+        $itemCategoryMediumcd = $request->itemCategoryMediumcd;
+        $itemCd = $request->itemCd;
+        $isConfig = $request->isConfig;
 
+        $res = new BaseApiResponse();
+        try {
+            // デフォルトリスト
+            $count = $depoDefaultListUseCase->countDepoDefaultList($prefCd, $depoCd, $itemCategoryLargecd, $itemCategoryMediumcd ,$itemCd, $isConfig);
+            // 返却
+            $res->apiSuccessful();
+            $res->data = $count;
+        } catch (Exception $ex) {
+            Log::error($ex->getMessage());
+            $res->apiServerError(500, Lang::get('error.C_L11.search'));
+        }
+        return $res;
     }
 
     /**

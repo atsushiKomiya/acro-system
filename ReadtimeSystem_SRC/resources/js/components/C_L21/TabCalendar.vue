@@ -266,25 +266,27 @@ export default {
       e.stopPropagation();
     },
     save: function (e) {
-      this.$root.$refs.appProgress.busy(true);
-      Repository.saveCalendar(this.vm)
-        .then((response) => {
-          this.$root.$refs.appProgress.busy(false);
-          if (response.data.isSuccess) {
-            this.changeDepoDefaultId(this.vm.depoDefaultId);
-            alert("登録に成功しました。");
-            this.search()
-          } else {
-            alert(response.data.message);
-          }
-        })
-        .catch((error) => {
-          var data = error.response.data;
-          alert(data.message);
-          this.$root.$refs.appProgress.busy(false);
-        })
-        .finally(() => {
-        });
+      if(confirm('カレンダーデフォルト情報を登録します、よろしいですか？')) {
+        this.$root.$refs.appProgress.busy(true);
+        Repository.saveCalendar(this.vm)
+          .then((response) => {
+            this.$root.$refs.appProgress.busy(false);
+            if (response.data.isSuccess) {
+              this.changeDepoDefaultId(this.vm.depoDefaultId);
+              alert("登録に成功しました。");
+              this.search()
+            } else {
+              alert(response.data.message);
+            }
+          })
+          .catch((error) => {
+            var data = error.response.data;
+            alert(data.message);
+            this.$root.$refs.appProgress.busy(false);
+          })
+          .finally(() => {
+          });
+      }
     },
     reflect: function (e) {
       if(confirm('指定された適用開始日にてカレンダー情報を更新します、よろしいですか？')) {

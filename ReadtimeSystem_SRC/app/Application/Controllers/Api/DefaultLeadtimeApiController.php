@@ -59,11 +59,12 @@ class DefaultLeadtimeApiController extends ApiController
 
         $res = new BaseApiResponse();
         try {
+            $displayType = $request->input('param');
             // ファイルアップロード
             $fileName = $this->tempFileupload('uploadFile');
 
             // アップロード処理
-            $csvImportEntity = $usecase->leadtimeCsv($fileName);
+            $csvImportEntity = $usecase->leadtimeCsv($fileName, $displayType);
 
             if($csvImportEntity->isSuccess) {
                 // 成功
@@ -118,12 +119,13 @@ class DefaultLeadtimeApiController extends ApiController
     {
         $depoCd = $request->depoCd;
         $leadtimeList = $request->leadtimeList;
+        $displayType = $request->displayType;
 
         $res = new BaseApiResponse();
         try {
             DB::beginTransaction();
             // 登録処理
-            $resultEntity = $usecase->save($leadtimeList);
+            $resultEntity = $usecase->save($leadtimeList, $displayType);
             $res = BaseApiResponse::byResultEntity($resultEntity);
 
             // C_LI_03_受注データ更新用CSV出力
@@ -135,14 +137,22 @@ class DefaultLeadtimeApiController extends ApiController
                     'tyou' => $leadtime['tyou']
                 ];
             })->all();
-            $orderCsvExpUsecase->chgDepoInfoCsv($depoCdList, $addressList, null, null, null);
+            $orderCsvExpUsecase->chgDepoInfoCsv($depoCdList, $addressList, null, null, null, null);
             
             // コミット
             DB::commit();
         } catch (Exception $ex) {
             DB::rollBack();
             Log::error($ex->getMessage());
-            $res->apiServerError(500, Lang::get('error.C_L21.leadtime.save'));
+            if ($ex->getCode() === 4) {
+                // サプライズデポ 入力エラー
+                $res->apiServerError(422, Lang::get('error.C_L21.leadtime.save_surprise'));
+            } else if ($ex->getCode() === 8) {
+                // エンタメデポ 入力エラー
+                $res->apiServerError(422, Lang::get('error.C_L21.leadtime.save_entertainment'));
+            } else {
+                $res->apiServerError(500, Lang::get('error.C_L21.leadtime.save'));
+            }
         }
 
         return $res;

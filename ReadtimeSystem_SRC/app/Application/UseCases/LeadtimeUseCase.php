@@ -54,11 +54,38 @@ class LeadtimeUseCase
      * @param array $leadtimeList
      * @return ResultEntity
      */
-    public function save(array $leadtimeList): ResultEntity
+    public function save(array $leadtimeList, $displayType): ResultEntity
     {
         $result = new ResultEntity();
+        // 文字列から数値へ変換
+        $displayType = intval($displayType);
+
         try {
             foreach ($leadtimeList as $leadtime) {
+                // サプライズ 翌日時間指定 翌日締切時間 の選択された場合に例外
+                if (
+                    // サプライズデポ
+                    $displayType === AppConst::DEPO_DISPLAY_CLS_SURP &&
+                    (
+                        // 翌日時間指定もしくは翌日締切時間の入力があった場合
+                        intval($leadtime['nextDayTimeType']) > 0 ||
+                        intval($leadtime['nextDayTimeDeadline']) > 0
+                    )
+                ) {
+                    throw new Exception('surprise depo leadtime save error.', 4);
+                // エンタメ 当日配送締切時間の指定をされた場合に例外
+                } else if (
+                    // エンタメデポ
+                    $displayType === AppConst::DEPO_DISPLAY_CLS_ENTERME &&
+                    (
+                        // 当日配送締切時間の入力があった場合
+                        intval($leadtime['todayTimeDeadline1']) > 0 ||
+                        intval($leadtime['todayTimeDeadline2']) > 0 ||
+                        $leadtime['isAreaTodayDeliveryFlg'] === true
+                    )
+                ) {
+                    throw new Exception('entertainment depo leadtime save error.', 8);
+                }
                 // チェック処理
                 $validator = Validator::make($leadtime, [
                     'depoAddressLeadtimeId' => 'required|integer',

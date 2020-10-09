@@ -2,6 +2,9 @@
 
 namespace App\Application\Requests;
 
+use App\Infrastructure\Traits\ShainOrOwnDepoOnlyRequest;
+use AppConst;
+use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
@@ -9,14 +12,28 @@ use Illuminate\Foundation\Http\FormRequest;
  */
 class DepoRequestRequest extends FormRequest
 {
+    /** 社員、またはデポユーザーで自分のデポ対象のみ実行可能 */
+    use ShainOrOwnDepoOnlyRequest;
+
     /**
-     * 認証有無
+     * 操作対象のデポコードを取得する(権限チェック用)
      *
-     * @return boolean
+     * @return integer 操作対象のデポコード
      */
-    public function authorize()
+    private function getTargetDepoCd()
     {
-        return true;
+        $targetDepoCd = $this->get('searchDepocd');
+
+        // 検索対象のデポコードが指定されていない場合で、ログインユーザーがデポユーザーの場合は
+        // 検索対象を所属デポとして判定する
+        if(!$targetDepoCd){
+            $authInfo = $this->session()->get('auth_info');
+            if ($authInfo->AUTH_CLS == AppConst::AUTH_CLS['depo']) {
+                $targetDepoCd = $authInfo->DEPO_CD;
+            }
+        }
+
+        return $targetDepoCd;
     }
 
     /**
@@ -27,8 +44,8 @@ class DepoRequestRequest extends FormRequest
     public function rules()
     {
         return [
-            'searchYm'   => 'required|min:6|max:6',
-            'searchDepocd'   => 'required|numeric'
+            'searchYm'   => 'nullable|min:6|max:6',
+            'searchDepocd'   => 'nullable|numeric'
         ];
     }
 

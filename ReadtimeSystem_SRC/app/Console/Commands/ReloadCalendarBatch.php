@@ -9,6 +9,7 @@ use App\Application\UseCases\DepoCalAprInfoUseCase;
 use App\Application\UseCases\DepoDefaultUseCase;
 use App\Application\UseCases\DepoCalInfoUseCase;
 use App\Application\UseCases\DepoCalInfoTmpUseCase;
+use App\Application\UseCases\OrderUpdateCsvExportUseCase;
 use App\Consts\AppConst;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -43,7 +44,7 @@ class ReloadCalendarBatch extends Command
      * @param DepoCalInfoTmpUseCase $depoCalInfoTmpUC
      * @return void
      */
-    public function __construct(DepoUseCase $depoUC, PublicHolidayUseCase $publicHolidayUC, DepoCalAprInfoUseCase $depoCalAprInfoUC, DepoDefaultUseCase $depoDefaultUC, DepoCalInfoUseCase $depoCalInfoUC, DepoCalInfoTmpUsecase $depoCalInfoTmpUC)
+    public function __construct(DepoUseCase $depoUC, PublicHolidayUseCase $publicHolidayUC, DepoCalAprInfoUseCase $depoCalAprInfoUC, DepoDefaultUseCase $depoDefaultUC, DepoCalInfoUseCase $depoCalInfoUC, DepoCalInfoTmpUsecase $depoCalInfoTmpUC, OrderUpdateCsvExportUseCase $orderCsvExpUsecase)
     {
         parent::__construct();
         $this->depoUC = $depoUC;
@@ -52,6 +53,7 @@ class ReloadCalendarBatch extends Command
         $this->depoDefaultUC = $depoDefaultUC;
         $this->depoCalInfoUC = $depoCalInfoUC;
         $this->depoCalInfoTmpUC = $depoCalInfoTmpUC;
+        $this->orderCsvExpUsecase = $orderCsvExpUsecase;
     }
 
     /**
@@ -69,6 +71,9 @@ class ReloadCalendarBatch extends Command
         $depolist = $this->argument('depolist');
         $batchUserId = Config::get('batch.batch_user_id', '99999');
 
+        // 受注CSV用
+        $orderCsvDepoInfoList = array();
+
         try {
             // [1]	開始ログ「パラメータ取得処理を開始」を出力する
             BatchLog::info('パラメータ取得処理を開始');
@@ -79,10 +84,8 @@ class ReloadCalendarBatch extends Command
             // [4]	処理モードが未指定の場合は「処理モードが未指定です」をエラーログ出力し、エラー終了する。
             // [5]	処理モードが半角数字1,2以外の場合、「処理モードに半角数字1，2以外が指定されています」をエラーログ出力し、エラー終了する。
             if (empty($mode)) {
-                BatchLog::error('処理モードが未指定です');
                 throw new Exception('処理モードが未指定です');
             } elseif ($mode != 1 && $mode != 2) {
-                BatchLog::error('処理モードに半角数字1,2以外が指定されています');
                 throw new Exception('処理モードに半角数字1,2以外が指定されています');
             }
 
@@ -90,9 +93,12 @@ class ReloadCalendarBatch extends Command
             // [7]	適用開始日が未指定の場合は起動日を8桁の半角数字【yyyymmdd】で適用開始日に設定する。
             // [8]	適用開始日が8桁の半角数字以外の場合は、「適用開始日が半角数字8桁以外で指定されています」をエラーログ出力し、エラー終了する。
             if (empty($date)|| $date == "　") {
+                // 処理モードが2:更新で適用開始日が未指定の場合は、「更新モードでは適用開始日が必須です」をエラーログ出力し、エラー終了する。
+                if ($mode == 2) {
+                    throw new Exception('更新モードでは適用開始日が必須です');
+                }
                 $date = Carbon::now()->format("Ymd");
             } elseif (strlen($date) != "8" || preg_match("/^[0-9]+$/", $date) != 1) {
-                BatchLog::error('適用開始日が半角数字8桁以外で指定されています');
                 throw new Exception('適用開始日が半角数字8桁以外で指定されています');
             } else {
                 $date = $date;
@@ -179,13 +185,12 @@ class ReloadCalendarBatch extends Command
                     if (count($holidayList) > 0) {
                         $publicHolidayList = array_column($holidayList, 'date');
                     } else {
-                        BatchLog::error('祝日データがCSV、DBに存在しません');
                         throw new Exception('祝日データがCSV、DBに存在しません');
                     }
                 }
             } catch (Exception $exf) {
-                BatchLog::error('祝日判定用配列生成処理に失敗しました。');
-                DB::rollBack();
+                BatchLog::error($exf->getMessage());
+                throw new Exception('祝日判定用配列生成処理に失敗しました。');
             }
             // 	[3]	終了ログ「祝日判定用配列生成処理終了」を出力する
             BatchLog::info('祝日判定用配列生成処理終了');
@@ -211,6 +216,11 @@ class ReloadCalendarBatch extends Command
                     BatchLog::info('カレンダー適用処理開始　デポCD['. $calendarDepo->depocd .']');
                     // 	[2]	1.パラメータ取得処理で取得した適用開始日より適用するデポの稼働開始日が未来の場合、適用開始日を稼働開始日とする
                     $cDate = Carbon::parse($date);
+                    // デポの稼働開始日が取得できない場合はスキップ
+                    if(!$calendarDepo->startAt){
+                        BatchLog::error('稼働開始日が取得できないためスキップします　デポCD['.$calendarDepo->depocd.']');
+                        throw new Exception();
+                    }
                     $depoStartDate = Carbon::parse($calendarDepo->startAt);
                     $startDate = $depoStartDate->gt($cDate) ? $depoStartDate->format('Ymd') : $cDate->format('Ymd');
                     // 	[3]	1.パラメータ取得処理で取得した処理モードが追加モードの場合
@@ -218,8 +228,10 @@ class ReloadCalendarBatch extends Command
                     //          [3-a‐1]最新承認年月が取得できた場合、最新承認年月の次の月の1日が適用開始日となる
                     if ($mode == 1) {
                         $maxApprovalYm = $this->depoCalAprInfoUC->getMaxDate($calendarDepo->depocd);
-                        $maxApprovalYmFirst = Carbon::parse($maxApprovalYm . '01');
-                        $startDate = $maxApprovalYmFirst->addMonth()->format('Y-m-01');
+                        if ($maxApprovalYm) {
+                            $maxApprovalYmFirst = Carbon::parse($maxApprovalYm . '01');
+                            $startDate = $maxApprovalYmFirst->addMonth()->format('Y-m-01');
+                        }
                     }
 
                     // 	[4]	適用開始日～システム日付からｎヶ月後の末日までのカレンダ日付オブジェクトを生成し適用日付データ配列に格納する（※ｎは定義ファイルより取得）
@@ -272,7 +284,7 @@ class ReloadCalendarBatch extends Command
                     $depoDefaultSetCalDataArray = array();
                     $depoDefaultDateDataArray = array('mon','tue','wed','thu','fri','sat','sun','holiBefore','holi','holiAfter');
                     $holi = 'holi';
-                    if (!empty($depoDefaultCalData)) {
+                    if ($depoDefaultCalData->depoDefaultId) { // a）取得できた場合
                         foreach ($depoDefaultDateDataArray as $val) {
                             if (0 === strpos($val, $holi)) {
                                 $beforeDeadlineFlgName = $val.'DeadlineFlg';
@@ -285,9 +297,10 @@ class ReloadCalendarBatch extends Command
                             $depoDefaultSetCalDataArray["todayDeliveryFlg"] = $depoDefaultCalData->$todayDeliveryFlgName;
                             $depoDefaultCalDataArray[$val] = $depoDefaultSetCalDataArray;
                         }
-                    } else {
+                    } else { // b）取得できなかった場合
+                        DB::rollBack();
                         BatchLog::error('デポカレンダーデフォルト情報取得失敗　デポCD['. $calendarDepo->depocd.']スキップします');
-                        throw new Exception('デポカレンダーデフォルト情報取得失敗　デポCD['. $calendarDepo->depocd.']スキップします');
+                        continue;
                     }
                     // [4]	終了ログ「デポカレンダーデフォルト情報配列生成処理終了　デポCD[XXXX]」を出力する
                     BatchLog::info('デポカレンダーデフォルト情報配列処理終了　デポCD['. $calendarDepo->depocd.']');
@@ -356,7 +369,7 @@ class ReloadCalendarBatch extends Command
                     BatchLog::info('デポカレンダー承認情報データ削除登録処理開始　デポCD['. $calendarDepo->depocd .']');
                     // 		[2]	適用開始月以降のデポカレンダー承認情報データを論理削除する
                     // 			「シート[DB] -7. デポカレンダー承認情報論理削除処理」を実行する
-                    $this->depoCalAprInfoUC->deleteDepoCalAprInfo($calendarDepo->depocd, Carbon::parse($startDate)->format('Ym'));
+                    $this->depoCalAprInfoUC->deleteDepoCalAprInfo($calendarDepo->depocd, Carbon::parse($startDate)->format('Ym'), $batchUserId);
                     // 		[3]	適用開始月から適用終了月までのデポカレンダー承認情報データを登録する
                     // 			「シート[DB] -８. デポカレンダー承認情報登録処理」を実行する
                     // 			適用開始月から適用終了月まで繰り返す
@@ -387,14 +400,26 @@ class ReloadCalendarBatch extends Command
                     // 				コミットを実行し、終了ログ「カレンダー適用処理終了 デポCD[XXXX]」を出力する
                     DB::commit();
                     BatchLog::info('カレンダー適用処理終了 デポCD['.$calendarDepo->depocd.']');
-                    continue;
+
+                    // 受注CSV用
+                    if ($mode == "2") { // 上書きモードのみ
+                        $orderCsvDepoInfoList[] = array(
+                            'depoCd' => $calendarDepo->depocd,
+                            'from' => $startDate,
+                            'to' => $endDate
+                        );
+                    }
                 } catch (Exception $e) {
                     // 			b）異常終了した場合
                     // 				ロールバックを実行し、エラーログ「【処理名】でエラーが発生しました デポCD[XXXX]」を出力する
                     DB::rollBack();
                     BatchLog::error('カレンダー適用処理でエラーが発生しました　デポCD['.$calendarDepo->depocd.']');
-                    throw $e;
                 }
+            }
+
+            // C_LI_03_受注データ更新用CSV出力
+            if ($mode == "2") { // 上書きモードのみ
+                $this->orderCsvExpUsecase->chgDepoInfoCsvReloadCalendar($orderCsvDepoInfoList);
             }
 
             // 11．処理結果出力処理

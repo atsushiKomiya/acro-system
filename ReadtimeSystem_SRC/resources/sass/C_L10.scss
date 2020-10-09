@@ -12,8 +12,13 @@ table {
     width: 100%;
 }
 
-table thead th {
-    border:1px solid #ffffff !important;
+table thead {
+    tr:nth-child(2) th {
+        top: 26px;
+    }
+    th {
+        border:1px solid #ffffff !important;
+    }
 }
 
 table tbody tr td {
@@ -41,7 +46,7 @@ table tbody tr td {
     position: sticky;
     left: 0;
     background: $td-fixed-bgcolor !important;
-    z-index: 6 !important;
+    z-index: 5 !important;
     text-align: center;
 }
 

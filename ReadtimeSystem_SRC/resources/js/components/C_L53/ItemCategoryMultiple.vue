@@ -67,8 +67,8 @@
           <tr v-for="item in filterdItem" :key="item.itemCd" @click="select(item)" class="list-row" v-bind:class="{'selected': item.isSelect}">
             <td class="align-middle" ><input type="checkbox" v-model="item.isSelect"></td>
             <td>{{ '【'+item.itemCategoryLargeCd+'】'+item.itemCategoryLargeName }}</td>
-            <td>{{ '【'+item.itemCategoryMediumCd+'】'+item.itemCategoryMediumName }}</td>
-            <td>{{ '【'+item.itemCd+'】' + item.itemName }}</td>
+            <td><span v-if="item.itemCategoryMediumCd">{{ '【'+item.itemCategoryMediumCd+'】'+item.itemCategoryMediumName }}</span></td>
+            <td><span v-if="item.itemCd">{{ '【'+item.itemCd+'】' + item.itemName }}</span></td>
             <td>{{ item.keicho }}</td>
           </tr>
         </tbody>

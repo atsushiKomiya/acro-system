@@ -22,6 +22,7 @@ use App\Domain\Repositories\ViewItemRepositoryInterface;
 use Exception;
 use DB;
 use App\Mail\IrregularMail;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 
@@ -148,11 +149,12 @@ class IrregularUseCase
             $orderCsvDepoList = [];
             $orderCsvAddressList = [];
             $orderCsvItemList = [];
+            $orderCsvDayofweekList = [];
 
             $irregularEntity = new IrregularEntity();
             // 共通
             $irregularEntity->irregularId             = $irregular->irregularId;
-            $irregularEntity->irregularType           = $irregular->irregularType;
+            $irregularEntity->irregularType           = (int) $irregular->irregularType;
             $irregularEntity->title                   = $irregular->title;
             $irregularEntity->cUse                    = $irregular->cUse;
             $irregularEntity->isValid                 = $irregular->isValid;
@@ -172,6 +174,7 @@ class IrregularUseCase
                 $irregularEntity->orderDateFrom           = $irregular->orderDateFrom;
                 $irregularEntity->orderDateTo             = $irregular->orderDateTo;
                 $irregularEntity->transDepoCd             = $irregular->transDepoCd;
+                $irregularEntity->annoTrans               = $irregular->annoTrans;
             } else {
                 // 配送不可 ・ 受注制御共通
                 $irregularEntity->isTodayDeadlineUndeliv  = $irregular->isTodayDeadlineUndeliv;
@@ -192,7 +195,7 @@ class IrregularUseCase
                     $irregularEntity->timeSelect              = $irregular->timeSelect;
                 }
             }
-            $irregularId = $this->iIrregularRepository->save($irregularEntity);
+            $newIrregularId = $this->iIrregularRepository->save($irregularEntity);
 
             //イレギュラー地域登録
             $areaEntityList = [];
@@ -206,7 +209,7 @@ class IrregularUseCase
                     ];
                     // エリア登録
                     $irregularAreaEntity = new IrregularAreaEntity();
-                    $irregularAreaEntity->irregularId = $irregularId;
+                    $irregularAreaEntity->irregularId = $newIrregularId;
                     $irregularAreaEntity->addrCd = $area['addrcd'];
                     $irregularAreaEntity->zipcode = $area['zipcode'];
                     $irregularAreaEntity->prefCd = $area['pref'];
@@ -214,7 +217,7 @@ class IrregularUseCase
                     $irregularAreaEntity->tyou = $area['tyou'];
 
                     if ($area['mode'] == AppConst::LIST_ADD_MODE) {
-                        if (isset($area['irregularAreaId'])) {
+                        if (isset($area['irregularAreaId']) && $irregular->irregularId != null) {
                             //更新
                             $irregularAreaEntity->irregularAreaId = $area['irregularAreaId'];
                             $this->iIrregularAreaRepository->save($irregularAreaEntity);
@@ -234,7 +237,7 @@ class IrregularUseCase
                 }
             } else {
                 // 受注CSV用
-                $areaList = $this->iIrregularAreaRepository->findIrregularArea($irregularId);
+                $areaList = $this->iIrregularAreaRepository->findIrregularArea($newIrregularId);
                 $orderCsvAddressList = collect($areaList)->map(function ($address) {
                     return [
                         'prefCd' => $address->prefCd,
@@ -244,7 +247,7 @@ class IrregularUseCase
                 })->all();
                 
                 //削除
-                $this->iIrregularAreaRepository->deleteByIrregularId($irregularId, $loginUser->login_cd);
+                $this->iIrregularAreaRepository->deleteByIrregularId($newIrregularId, $loginUser->login_cd);
             }
             //イレギュラーデポ登録
             $depoEntityList = [];
@@ -255,12 +258,11 @@ class IrregularUseCase
                     // デポ登録
                     $irregularDepoId = isset($depo['irregularDepoId']) ? $depo['irregularDepoId'] : null;
                     $irregularDepoEntity = new IrregularDepoEntity();
-                    $irregularDepoEntity->irregularDepoId = $irregularDepoId;
-                    $irregularDepoEntity->irregularId = $irregularId;
+                    $irregularDepoEntity->irregularId = $newIrregularId;
                     $irregularDepoEntity->depoCd = $depo['depocd'];
 
                     if ($depo['mode'] == AppConst::LIST_ADD_MODE) {
-                        if ($irregularDepoId) {
+                        if ($irregularDepoId && $irregular->irregularId != null) {
                             //更新
                             $irregularDepoEntity->irregularDepoId = $irregularDepoId;
                             $this->iIrregularDepoRepository->save($irregularDepoEntity);
@@ -278,31 +280,34 @@ class IrregularUseCase
                 }
             } else {
                 // 受注CSV用
-                $depoList = $this->iIrregularDepoRepository->findIrregularDepo($irregularId);
+                $depoList = $this->iIrregularDepoRepository->findIrregularDepo($newIrregularId);
                 $orderCsvDepoList = collect($depoList)->map(function ($depo) {
                     return $depo->depoCd;
                 })->all();
                 
                 //削除
-                $this->iIrregularDepoRepository->deleteByIrregularId($irregularId, $loginUser->login_cd);
+                $this->iIrregularDepoRepository->deleteByIrregularId($newIrregularId, $loginUser->login_cd);
             }
             //イレギュラー商品登録
             $itemEntityList = [];
             if ($irregularEntity->isItem) {
                 foreach ($irregularItemList as $item) {
                     // 受注CSV用
-                    $orderCsvItemList[] = $item['itemCd'];
+                    $orderCsvItemList[] = array(
+                        'itemCategoryLargeCd' => $item['itemCategoryLargeCd'],
+                        'itemCategoryMediumCd' => $item['itemCategoryMediumCd'],
+                        'itemCd' => $item['itemCd']);
+
                     // 商品登録
                     $irregularItemId = isset($item['irregularItemId']) ? $item['irregularItemId'] : null;
                     $irregularItemEntity = new IrregularItemEntity();
-                    $irregularItemEntity->irregularItemId = $irregularItemId;
-                    $irregularItemEntity->irregularId = $irregularId;
+                    $irregularItemEntity->irregularId = $newIrregularId;
                     $irregularItemEntity->itemCategoryLargeCd = $item['itemCategoryLargeCd'];
                     $irregularItemEntity->itemCategoryMediumCd = $item['itemCategoryMediumCd'];
                     $irregularItemEntity->itemCd = $item['itemCd'];
 
                     if ($item['mode'] == AppConst::LIST_ADD_MODE) {
-                        if ($irregularItemId) {
+                        if ($irregularItemId && $irregular->irregularId != null) {
                             //更新
                             $irregularItemEntity->irregularItemId = $irregularItemId;
                             $this->iIrregularItemRepository->save($irregularItemEntity);
@@ -311,8 +316,7 @@ class IrregularUseCase
                             $this->iIrregularItemRepository->save($irregularItemEntity);
                         }
                         //メール
-                        $itemEntity = $this->iViewItemRepositoryInterface->findViewItem($item['itemCd']);
-                        array_push($itemEntityList, $itemEntity);
+                        array_push($itemEntityList, (object)$item);
                     } elseif ($depo['mode'] == AppConst::LIST_DEL_MODE) {
                         //削除
                         $this->iIrregularItemRepository->deleteById($irregularItemId, $loginUser->login_cd);
@@ -320,37 +324,51 @@ class IrregularUseCase
                 }
             } else {
                 // 受注CSV用
-                $itemList = $this->iIrregularItemRepository->findIrregularItem($irregularId);
+                $itemList = $this->iIrregularItemRepository->findIrregularItem($newIrregularId);
                 $orderCsvItemList = collect($itemList)->map(function ($item) {
-                    return $item->itemCd;
+                    return array(
+                        'itemCategoryLargeCd' => $item->itemCategoryLargeCd,
+                        'itemCategoryMediumCd' => $item->itemCategoryMediumCd,
+                        'itemCd' => $item->itemCd);
                 })->all();
                 
                 //削除
-                $this->iIrregularItemRepository->deleteByIrregularId($irregularId, $loginUser->login_cd);
+                $this->iIrregularItemRepository->deleteByIrregularId($newIrregularId, $loginUser->login_cd);
             }
             //イレギュラー曜日削除〜登録
             $irregularDayofweekEntityList = [];
             // お届け
+            /** はじめにイレギュラーIDで登録されているお届け日を削除 */
+            $this->iIrregularDayofweekRepository->forceDeleteByIrregularId($newIrregularId, AppConst::DATE_TYPE['DELIVERY_DATE']);
             if ($irregularEntity->deliveryDateType == AppConst::DELIVERY_DATE_TYPE['WEEK']) {
                 foreach ($irregularDeliveryDayofweekList as $week) {
                     $irregularDayofweekEntity = new IrregularDayofweekEntity();
-                    $irregularDayofweekEntity->irregularId = $irregularId;
+                    $irregularDayofweekEntity->irregularId = $newIrregularId;
                     $irregularDayofweekEntity->dateType = $week['dateType'];
                     $irregularDayofweekEntity->dayofweek = $week['dayofweek'];
                     $irregularDayofweekEntity->publicHolidayStatus = $week['publicHolidayStatus'];
 
                     $this->iIrregularDayofweekRepository->save($irregularDayofweekEntity);
                     array_push($irregularDayofweekEntityList, $irregularDayofweekEntity);
+
+                    // 受注CSV用
+                    $dayofweek = array(
+                        'dayofweek' => $irregularDayofweekEntity->dayofweek,
+                        'publicHolidayStatus' => $irregularDayofweekEntity->publicHolidayStatus
+                    );
+                    array_push($orderCsvDayofweekList, $dayofweek);
                 }
             } else {
-                $this->iIrregularDayofweekRepository->forceDeleteByIrregularId($irregularId, AppConst::DATE_TYPE['DELIVERY_DATE']);
+                $this->iIrregularDayofweekRepository->forceDeleteByIrregularId($newIrregularId, AppConst::DATE_TYPE['DELIVERY_DATE']);
             }
 
             // 受注日
+            /** はじめにイレギュラーIDで登録されている受注日を削除 */
+            $this->iIrregularDayofweekRepository->forceDeleteByIrregularId($newIrregularId, AppConst::DATE_TYPE['ORDER_DATE']);
             if ($irregularEntity->orderDateType == AppConst::ORDER_DATE_TYPE['WEEK']) {
                 foreach ($irregularOrderDayofweekList as $week) {
                     $irregularDayofweekEntity = new IrregularDayofweekEntity();
-                    $irregularDayofweekEntity->irregularId = $irregularId;
+                    $irregularDayofweekEntity->irregularId = $newIrregularId;
                     $irregularDayofweekEntity->dateType = $week['dateType'];
                     $irregularDayofweekEntity->dayofweek = $week['dayofweek'];
                     $irregularDayofweekEntity->publicHolidayStatus = $week['publicHolidayStatus'];
@@ -359,11 +377,32 @@ class IrregularUseCase
                     array_push($irregularDayofweekEntityList, $irregularDayofweekEntity);
                 }
             } else {
-                $this->iIrregularDayofweekRepository->forceDeleteByIrregularId($irregularId, AppConst::DATE_TYPE['ORDER_DATE']);
+                $this->iIrregularDayofweekRepository->forceDeleteByIrregularId($newIrregularId, AppConst::DATE_TYPE['ORDER_DATE']);
+            }
+
+
+            // 受注CSV用
+            // お届け日のタイプが日付の場合はfrom, toが同日、期間の場合はそれぞれセット（半角数字8桁）
+            $orderCsvFrom = null;
+            $orderCsvTo = null;
+            if ($irregularEntity->deliveryDateType == AppConst::DELIVERY_DATE_TYPE['DAY']) {
+                $orderCsvDate = Carbon::createFromFormat('Y-m-d', $irregularEntity->deliveryDate)->format('Ymd');
+                $orderCsvFrom = $orderCsvDate;
+                $orderCsvTo = $orderCsvDate;
+            } elseif ($irregularEntity->deliveryDateType == AppConst::DELIVERY_DATE_TYPE['PERIOD']) {
+                $orderCsvFrom = Carbon::createFromFormat('Y-m-d', $irregularEntity->deliveryDateFrom)->format('Ymd');
+                $orderCsvTo = Carbon::createFromFormat('Y-m-d', $irregularEntity->deliveryDateTo)->format('Ymd');
             }
                 
             // C_LI_03_受注データ更新用CSV出力
-            $this->orderCsvExpUsecase->chgDepoInfoCsv($orderCsvDepoList, $orderCsvAddressList, $orderCsvItemList, null, null);
+            $this->orderCsvExpUsecase->chgDepoInfoCsv(
+                $orderCsvDepoList,
+                $orderCsvAddressList,
+                $orderCsvItemList,
+                $orderCsvFrom,
+                $orderCsvTo,
+                $orderCsvDayofweekList
+            );
 
             //commit
             DB::commit();
@@ -388,7 +427,7 @@ class IrregularUseCase
             throw $ex;
         }
 
-        return $irregularId;
+        return $newIrregularId;
     }
    
     /**

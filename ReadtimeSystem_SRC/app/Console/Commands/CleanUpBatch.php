@@ -27,7 +27,7 @@ class CleanUpBatch extends Command
      *
      * @var string
      */
-    protected $description = 'CreanUPバッチ';
+    protected $description = 'CleanUPバッチ';
 
     /**
      * Create a new command instance.
@@ -52,7 +52,7 @@ class CleanUpBatch extends Command
     public function handle()
     {
         try {
-            BatchLog::info('CreanUPバッチ開始');
+            BatchLog::info('CleanUPバッチ開始');
             // バッチユーザ
             $batchUserId = Config::get('batch.batch_user_id', '99999');
             // ファイル削除対象ディレクトリ取得
@@ -64,49 +64,60 @@ class CleanUpBatch extends Command
 
             // [1]トランザクションを開始する
             DB::beginTransaction();
+            $deletingTableName = '';
 
-            //［2］開始ログ「デポカレンダー情報不要データ削除処理開始」を出力する
-            BatchLog::info('デポカレンダー情報不要データ削除処理開始');
+            try {
+                //［2］開始ログ「デポカレンダー情報不要データ削除処理開始」を出力する
+                BatchLog::info('デポカレンダー情報不要データ削除処理開始');
+                $deletingTableName = 'デポカレンダー情報';
 
-            // [3] バッチ起動日のNヶ月前の月の1日を削除基準年月日とNヶ月前の月を削除基準年月とする（シート[DB]で使用）
-            $subMonth = Config::get('batch.creanUpMonth');
-            $criterionDate = Carbon::now()->subMonth($subMonth)->firstOfMonth()->format('Y-m-d');
-            
-            //［4］「シート[DB] - 1. デポカレンダー情報削除」を実行する
-            $this->depoCalInfoUC->deleteDepoCalInfoCreanUp($criterionDate);
-            
-            //［5］終了ログ「デポカレンダー情報不要データ削除処理終了」を出力する
-            BatchLog::info('デポカレンダー情報不要データ削除処理終了');
+                // [3] バッチ起動日のNヶ月前の月の1日を削除基準年月日とNヶ月前の月を削除基準年月とする（シート[DB]で使用）
+                $subMonth = Config::get('batch.cleanUpMonth');
+                $criterionCarbon = Carbon::now()->subMonth($subMonth)->firstOfMonth();
+                $criterionDate = $criterionCarbon->format('Ymd');
+                $criterionYm = $criterionCarbon->format('Ym');
+                
+                //［4］「シート[DB] - 1. デポカレンダー情報削除」を実行する
+                $this->depoCalInfoUC->deleteDepoCalInfoCleanUp($criterionDate);
+                
+                //［5］終了ログ「デポカレンダー情報不要データ削除処理終了」を出力する
+                BatchLog::info('デポカレンダー情報不要データ削除処理終了');
 
 
-            // **************************************************************************************
-            //2.デポカレンダー情報-tmp不要データ削除処理
-            // **************************************************************************************
-            
-            // [1] 開始ログ「デポカレンダー情報-tmp不要データ削除処理開始」を出力する
-            BatchLog::info('デポカレンダー情報-tmp不要データ削除処理開始');
-            
-            // [2]「シート[DB] - 2. デポカレンダー情報-tmp論理削除」を実行する
-            $this->depoCalInfoTmpUC->deleteDepoCalInfoTmpCreanUp($criterionDate, $batchUserId);
+                // **************************************************************************************
+                //2.デポカレンダー情報-tmp不要データ削除処理
+                // **************************************************************************************
+                
+                // [1] 開始ログ「デポカレンダー情報-tmp不要データ削除処理開始」を出力する
+                BatchLog::info('デポカレンダー情報-tmp不要データ削除処理開始');
+                $deletingTableName = 'デポカレンダー情報-tmp';
+                
+                // [2]「シート[DB] - 2. デポカレンダー情報-tmp論理削除」を実行する
+                $this->depoCalInfoTmpUC->deleteDepoCalInfoTmpCleanUp($criterionDate, $batchUserId);
 
-            // [3] 終了ログ「デポカレンダー情報-tmp不要データ削除処理終了」を出力する
-            BatchLog::info('デポカレンダー情報-tmp不要データ削除処理終了');
-            
-            // **************************************************************************************
-            //3.デポカレンダー承認情報不要データ削除処理
-            // **************************************************************************************
-            
-            // [1]	開始ログ「デポカレンダー承認情報不要データ削除処理開始」を出力する
-            BatchLog::info('デポカレンダー承認情報不要データ削除処理開始');
-            
-            // [2]「シート[DB] - 3. デポカレンダー承認情報論理削除」を実行する
-            $this->depoCalAprInfoUC->deleteDepoCalAprInfoCreanUp($criterionDate, $batchUserId);
+                // [3] 終了ログ「デポカレンダー情報-tmp不要データ削除処理終了」を出力する
+                BatchLog::info('デポカレンダー情報-tmp不要データ削除処理終了');
+                
+                // **************************************************************************************
+                //3.デポカレンダー承認情報不要データ削除処理
+                // **************************************************************************************
+                
+                // [1]	開始ログ「デポカレンダー承認情報不要データ削除処理開始」を出力する
+                BatchLog::info('デポカレンダー承認情報不要データ削除処理開始');
+                $deletingTableName = 'デポカレンダー承認情報';
 
-            // [3]	終了ログ「デポカレンダー承認情報不要データ削除処理終了」を出力する
-            BatchLog::info('デポカレンダー承認情報不要データ削除処理終了');
-            
-            // [4] トランザクションを終了する
-            DB::commit();
+                // [2]「シート[DB] - 3. デポカレンダー承認情報論理削除」を実行する
+                $this->depoCalAprInfoUC->deleteDepoCalAprInfoCleanUp($criterionYm, $batchUserId);
+
+                // [3]	終了ログ「デポカレンダー承認情報不要データ削除処理終了」を出力する
+                BatchLog::info('デポカレンダー承認情報不要データ削除処理終了');
+                
+                // [4] トランザクションを終了する
+                DB::commit();
+            } catch (Exception $e) {
+                DB::rollBack();
+                BatchLog::error('【' . $deletingTableName . '】の削除処理でエラーが発生しました');
+            }
             
             // **************************************************************************************
             //4.不要CSVデータ削除処理
@@ -122,7 +133,7 @@ class CleanUpBatch extends Command
             foreach (glob($backupDir.'*.csv') as $file) {
                 if (is_file($file)) {
                     $fileCreateTime = Carbon::CreateFromTimestamp(filemtime($file));
-                    if ($fileCreateTime->lt($criterionDate)) {
+                    if ($fileCreateTime->lt($criterionCarbon)) {
                         $fileNameList[] = htmlspecialchars($file);
                     }
                 }
@@ -140,7 +151,6 @@ class CleanUpBatch extends Command
             
             return 0;
         } catch (Exception $e) {
-            DB::rollBack();
             BatchLog::error('クリーンアップバッチ異常終了');
             return 1;
         }

@@ -58,4 +58,12 @@ interface IrregularRepositoryInterface
      * @return LazyCollection
      */
     public function findIrregularList(IrregularListSearchEntity $cond): LazyCollection;
+
+    /**
+     * イレギュラー件数取得
+     * 
+     * @param IrregularListSearchEntity $condition
+     * @return int
+     */
+    public function countIrregularList(IrregularListSearchEntity $condition): int;
 }

@@ -43,7 +43,7 @@
           <thead>
             <tr>
               <th class="t-check align-middle" scope="col" v-if="ismulti">
-                <input type="checkbox" v-model="allSelected"/>
+                <input type="checkbox" v-model="allSelected" @click="allSelectedFunc"/>
               </th>
               <th class="t-depo align-middle" scope="col">デポ名</th>
               <th class="t-pref align-middle" scope="col">都道府県</th>
@@ -82,7 +82,8 @@ export default {
       mDepoList: this.depolist,
       allSelected: false,
       selectPref: '',
-      selectDisp: ''
+      selectDisp: '',
+      oneSelectedFlg: false,
     }
   },
   methods: {
@@ -133,11 +134,16 @@ export default {
         });
       }
       // 選択/解除
+      this.oneSelectedFlg = true;
       if(oldIsSelect) {
         this.$set(depo,"isSelect",false);
       } else {
         this.$set(depo,"isSelect",true);
       }
+    },
+    allSelectedFunc: function () {
+      this.oneSelectedFlg = false;
+      this.allSelected = this.allSelected ? false : true;
     }
   },
   computed: {
@@ -184,7 +190,6 @@ export default {
       } else {
         this.allSelected = false;
       }
-
       return data;
     }
   },
@@ -192,9 +197,11 @@ export default {
     allSelected: function(val) {
       var app = this;
       var isSelect = val;
-      this.filteredTasks.forEach(function(depo){
-        app.$set(depo,"isSelect",isSelect);
-      });
+      if (!this.oneSelectedFlg) {
+        this.filteredTasks.forEach(function(depo){
+          app.$set(depo,"isSelect",isSelect);
+        });
+      }
     }
   }
 }

@@ -2,22 +2,16 @@
 
 namespace App\Application\Requests;
 
+use App\Infrastructure\Traits\ShainOnlyRequest;
 use Illuminate\Foundation\Http\FormRequest;
 
 /**
- * 住所リスト検索リクエスト
+ * メッセージ重複確認リクエスト
  */
 class MessageDuplicationSearchRequest extends FormRequest
 {
-    /**
-     * 認証有無
-     *
-     * @return boolean
-     */
-    public function authorize()
-    {
-        return true;
-    }
+    /** 社員のみ実行可能 */
+    use ShainOnlyRequest;
 
     /**
      * バリデーション

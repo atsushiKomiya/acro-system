@@ -2,20 +2,15 @@
 
 namespace App\Application\Requests;
 
+use App\Infrastructure\Traits\ShainOnlyRequest;
+
 /**
  * デフォルト設定デポ商品コード紐付情報登録リクエスト
  */
 class DefaultDepoItemRegisterRequest extends ApiRequest
 {
-    /**
-     * 認証有無
-     *
-     * @return boolean
-     */
-    public function authorize()
-    {
-        return true;
-    }
+    /** 社員のみ実行可能 */
+    use ShainOnlyRequest;
 
     /**
      * バリデーション

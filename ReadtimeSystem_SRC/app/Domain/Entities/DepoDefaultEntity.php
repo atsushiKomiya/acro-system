@@ -60,7 +60,7 @@ class DepoDefaultEntity implements JsonSerializable
         $privateHomeFlg= false,
         $handingFlg= false,
         $congratulationKbnFlg = 3,
-        $transferPostDepoCd = 0,
+        $transferPostDepoCd = null,
         $transferPostDepoName = '',
         $depoLeadTime= 0
     ) {

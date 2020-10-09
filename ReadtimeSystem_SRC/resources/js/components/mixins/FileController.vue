@@ -26,25 +26,28 @@
         });
       },
       /** CSV取込 */
-      upload: function(url,file,$func = null) {
-        if (file) {
-          this.$root.$refs.appProgress.busy(true);
-          CsvUploadRepository.uploadApi(url,file)
-          .then(function(response) {
-            if($func) {
-              $func(response);
-            }
-          })
-          .catch(function(error) {
-            if($func) {
-              $func(error);
-            }
-          })
-          .finally(() => {
-            this.$root.$refs.appProgress.busy(false);
-          });
-        } else {
-          alert("ファイルを選択してください");
+      upload: function(url,file,$func = null, param = null) {
+        if(confirm('CSVを取り込みます。よろしいですか？')) {
+          if (file) {
+            this.$root.$refs.appProgress.busy(true);
+            CsvUploadRepository.uploadApi(url,file,param)
+            .then(function(response) {
+              if($func) {
+                $func(response);
+              }
+            })
+            .catch(function(error) {
+              if($func) {
+                $func(error);
+              }
+            })
+            .finally(() => {
+              // upload完了後のCSV取込ボタン非活性化
+              this.mUploadfile = null
+            });
+          } else {
+            alert("ファイルを選択してください");
+          }
         }
       },
       /** 選択された File の情報を保存 */

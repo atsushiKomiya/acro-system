@@ -87,98 +87,140 @@ class DefaultCsvDownloadUseCase extends BaseCsvExportUseCase
     {
         $model = $this->iViewAddressRepository->findDepoDefaultList($prefCd, $depoCd, $itemCategoryLargecd, $itemCategoryMediumcd ,$itemCd, $isConfig);
         $func = function ($cursor) {
-            $returnRow = $cursor;
+            $returnRow = array(); 
+            $returnRow['addrcd'] = $cursor->addrcd;
+            $returnRow['jiscode'] = $cursor->jiscode;
+            $returnRow['zipcode'] = $cursor->zipcode;
+            $returnRow['pref'] = $cursor->pref;
+            $returnRow['siku'] = $cursor->siku;
+            $returnRow['tyou'] = $cursor->tyou;
+            $returnRow['deponame1'] = $cursor->deponame1;
+            $returnRow['deponame2'] = $cursor->deponame2;
+            $returnRow['depo_lead_time'] = $cursor->depo_lead_time;
+            $returnRow['depo_cd'] = $cursor->depo_cd;
+            $returnRow['transfer_post_depo_cd'] = $cursor->transfer_post_depo_cd;
+            $returnRow['next_day_time_type'] = $cursor->next_day_time_type;
+            $returnRow['next_day_time_deadline'] = $cursor->next_day_time_deadline;
+            $returnRow['today_time_deadline1'] = $cursor->today_time_deadline1;
+            $returnRow['today_time_deadline2'] = $cursor->today_time_deadline2;
+            $returnRow['is_area_today_delivery_flg'] = $cursor->is_area_today_delivery_flg;
+            $returnRow['mon_before_deadline_flg'] = $cursor->mon_before_deadline_flg;
+            $returnRow['mon_today_delivery_flg'] = $cursor->mon_today_delivery_flg;
+            $returnRow['tue_before_deadline_flg'] = $cursor->tue_before_deadline_flg;
+            $returnRow['tue_today_delivery_flg'] = $cursor->tue_today_delivery_flg;
+            $returnRow['wed_before_deadline_flg'] = $cursor->wed_before_deadline_flg;
+            $returnRow['wed_today_delivery_flg'] = $cursor->wed_today_delivery_flg;
+            $returnRow['thu_before_deadline_flg'] = $cursor->thu_before_deadline_flg;
+            $returnRow['thu_today_delivery_flg'] = $cursor->thu_today_delivery_flg;
+            $returnRow['fri_before_deadline_flg'] = $cursor->fri_before_deadline_flg;
+            $returnRow['fri_today_delivery_flg'] = $cursor->fri_today_delivery_flg;
+            $returnRow['sat_before_deadline_flg'] = $cursor->sat_before_deadline_flg;
+            $returnRow['sat_today_delivery_flg'] = $cursor->sat_today_delivery_flg;
+            $returnRow['sun_before_deadline_flg'] = $cursor->sun_before_deadline_flg;
+            $returnRow['sun_today_delivery_flg'] = $cursor->sun_today_delivery_flg;
+            $returnRow['holi_before_deadline_flg'] = $cursor->holi_before_deadline_flg;
+            $returnRow['holi_before_today_delivery_flg'] = $cursor->holi_before_today_delivery_flg;
+            $returnRow['holi_deadline_flg'] = $cursor->holi_deadline_flg;
+            $returnRow['holi_today_delivery_flg'] = $cursor->holi_today_delivery_flg;
+            $returnRow['holi_after_deadline_flg'] = $cursor->holi_after_deadline_flg;
+            $returnRow['holi_after_today_delivery_flg'] = $cursor->holi_after_today_delivery_flg;
+            $returnRow['private_home_flg'] = $cursor->private_home_flg;
+            $returnRow['handing_flg'] = $cursor->handing_flg;
+            $returnRow['congratulation_kbn_flg'] = $cursor->congratulation_kbn_flg;
             // 時間指定変換
             $timeSelectList = Config::get('delivery.time_select_list');
 
-            if (is_numeric($returnRow['next_day_time_type'])) {
-                $returnRow['next_day_time_type'] = $timeSelectList[$returnRow['next_day_time_type']];
-            } elseif (is_bool($returnRow['next_day_time_type'])) {
-                $returnRow['next_day_time_type'] = $returnRow['next_day_time_type'] ? '時間指定不可' : '';
+            if (is_numeric($cursor->next_day_time_type)) {
+                $returnRow['next_day_time_type'] = $timeSelectList[$cursor->next_day_time_type];
+            } elseif (is_bool($cursor->next_day_time_type)) {
+                $returnRow['next_day_time_type'] = $cursor->next_day_time_type ? '時間指定不可' : '';
             }
 
-            if (is_numeric($returnRow['next_day_time_deadline'])) {
-                $returnRow['next_day_time_deadline'] = $timeSelectList[$returnRow['next_day_time_deadline']];
+            if (is_numeric($cursor->next_day_time_deadline)) {
+                $returnRow['next_day_time_deadline'] = $timeSelectList[$cursor->next_day_time_deadline];
             }
            
-            if (is_numeric($returnRow['today_time_deadline1'])) {
-                $returnRow['today_time_deadline1'] = $timeSelectList[$returnRow['today_time_deadline1']];
+            if (is_numeric($cursor->today_time_deadline1)) {
+                $returnRow['today_time_deadline1'] = $timeSelectList[$cursor->today_time_deadline1];
             }
             
-            if (is_numeric($returnRow['today_time_deadline2'])) {
-                $returnRow['today_time_deadline2'] = $timeSelectList[$returnRow['today_time_deadline2']];
+            if (is_numeric($cursor->today_time_deadline2)) {
+                $returnRow['today_time_deadline2'] = $timeSelectList[$cursor->today_time_deadline2];
             }
             
-            if (is_bool($returnRow['is_area_today_delivery_flg'])) {
-                $returnRow['is_area_today_delivery_flg'] = $returnRow['is_area_today_delivery_flg'] ? '〇' : '×';
+            if (is_bool($cursor->is_area_today_delivery_flg)) {
+                $returnRow['is_area_today_delivery_flg'] = $cursor->is_area_today_delivery_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['mon_before_deadline_flg'])) {
-                $returnRow['mon_before_deadline_flg'] = $returnRow['mon_before_deadline_flg'] ? '〇' : '×';
+            if (is_bool($cursor->mon_before_deadline_flg)) {
+                $returnRow['mon_before_deadline_flg'] = $cursor->mon_before_deadline_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['mon_today_delivery_flg'])) {
-                $returnRow['mon_today_delivery_flg'] = $returnRow['mon_today_delivery_flg'] ? '〇' : '×';
+            if (is_bool($cursor->mon_today_delivery_flg)) {
+                $returnRow['mon_today_delivery_flg'] = $cursor->mon_today_delivery_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['tue_before_deadline_flg'])) {
-                $returnRow['tue_before_deadline_flg'] = $returnRow['tue_before_deadline_flg'] ? '〇' : '×';
+            if (is_bool($cursor->tue_before_deadline_flg)) {
+                $returnRow['tue_before_deadline_flg'] = $cursor->tue_before_deadline_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['tue_today_delivery_flg'])) {
-                $returnRow['tue_today_delivery_flg'] = $returnRow['tue_today_delivery_flg'] ? '〇' : '×';
+            if (is_bool($cursor->tue_today_delivery_flg)) {
+                $returnRow['tue_today_delivery_flg'] = $cursor->tue_today_delivery_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['wed_before_deadline_flg'])) {
-                $returnRow['wed_before_deadline_flg'] = $returnRow['wed_before_deadline_flg'] ? '〇' : '×';
+            if (is_bool($cursor->wed_before_deadline_flg)) {
+                $returnRow['wed_before_deadline_flg'] = $cursor->wed_before_deadline_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['wed_today_delivery_flg'])) {
-                $returnRow['wed_today_delivery_flg'] = $returnRow['wed_today_delivery_flg'] ? '〇' : '×';
+            if (is_bool($cursor->wed_today_delivery_flg)) {
+                $returnRow['wed_today_delivery_flg'] = $cursor->wed_today_delivery_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['thu_before_deadline_flg'])) {
-                $returnRow['thu_before_deadline_flg'] = $returnRow['thu_before_deadline_flg'] ? '〇' : '×';
+            if (is_bool($cursor->thu_before_deadline_flg)) {
+                $returnRow['thu_before_deadline_flg'] = $cursor->thu_before_deadline_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['thu_today_delivery_flg'])) {
-                $returnRow['thu_today_delivery_flg'] = $returnRow['thu_today_delivery_flg'] ? '〇' : '×';
+            if (is_bool($cursor->thu_today_delivery_flg)) {
+                $returnRow['thu_today_delivery_flg'] = $cursor->thu_today_delivery_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['fri_before_deadline_flg'])) {
-                $returnRow['fri_before_deadline_flg'] = $returnRow['fri_before_deadline_flg'] ? '〇' : '×';
+            if (is_bool($cursor->fri_before_deadline_flg)) {
+                $returnRow['fri_before_deadline_flg'] = $cursor->fri_before_deadline_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['fri_today_delivery_flg'])) {
-                $returnRow['fri_today_delivery_flg'] = $returnRow['fri_today_delivery_flg'] ? '〇' : '×';
+            if (is_bool($cursor->fri_today_delivery_flg)) {
+                $returnRow['fri_today_delivery_flg'] = $cursor->fri_today_delivery_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['sat_before_deadline_flg'])) {
-                $returnRow['sat_before_deadline_flg'] = $returnRow['sat_before_deadline_flg'] ? '〇' : '×';
+            if (is_bool($cursor->sat_before_deadline_flg)) {
+                $returnRow['sat_before_deadline_flg'] = $cursor->sat_before_deadline_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['sat_today_delivery_flg'])) {
-                $returnRow['sat_today_delivery_flg'] = $returnRow['sat_today_delivery_flg'] ? '〇' : '×';
+            if (is_bool($cursor->sat_today_delivery_flg)) {
+                $returnRow['sat_today_delivery_flg'] = $cursor->sat_today_delivery_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['sun_before_deadline_flg'])) {
-                $returnRow['sun_before_deadline_flg'] = $returnRow['sun_before_deadline_flg'] ? '〇' : '×';
+            if (is_bool($cursor->sun_before_deadline_flg)) {
+                $returnRow['sun_before_deadline_flg'] = $cursor->sun_before_deadline_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['sun_today_delivery_flg'])) {
-                $returnRow['sun_today_delivery_flg'] = $returnRow['sun_today_delivery_flg'] ? '〇' : '×';
+            if (is_bool($cursor->sun_today_delivery_flg)) {
+                $returnRow['sun_today_delivery_flg'] = $cursor->sun_today_delivery_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['holi_before_deadline_flg'])) {
-                $returnRow['holi_before_deadline_flg'] = $returnRow['holi_before_deadline_flg'] ? '〇' : '×';
+            if (is_bool($cursor->holi_before_deadline_flg)) {
+                $returnRow['holi_before_deadline_flg'] = $cursor->holi_before_deadline_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['holi_before_today_delivery_flg'])) {
-                $returnRow['holi_before_today_delivery_flg'] = $returnRow['holi_before_today_delivery_flg'] ? '〇' : '×';
+            if (is_bool($cursor->holi_before_today_delivery_flg)) {
+                $returnRow['holi_before_today_delivery_flg'] = $cursor->holi_before_today_delivery_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['holi_deadline_flg'])) {
-                $returnRow['holi_deadline_flg'] = $returnRow['holi_deadline_flg'] ? '〇' : '×';
+            if (is_bool($cursor->holi_deadline_flg)) {
+                $returnRow['holi_deadline_flg'] = $cursor->holi_deadline_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['holi_today_delivery_flg'])) {
-                $returnRow['holi_today_delivery_flg'] = $returnRow['holi_today_delivery_flg'] ? '〇' : '×';
+            if (is_bool($cursor->holi_today_delivery_flg)) {
+                $returnRow['holi_today_delivery_flg'] = $cursor->holi_today_delivery_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['holi_after_deadline_flg'])) {
-                $returnRow['holi_after_deadline_flg'] = $returnRow['holi_after_deadline_flg'] ? '〇' : '×';
+            if (is_bool($cursor->holi_after_deadline_flg)) {
+                $returnRow['holi_after_deadline_flg'] = $cursor->holi_after_deadline_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['holi_after_today_delivery_flg'])) {
-                $returnRow['holi_after_today_delivery_flg'] = $returnRow['holi_after_today_delivery_flg'] ? '〇' : '×';
+            if (is_bool($cursor->holi_after_today_delivery_flg)) {
+                $returnRow['holi_after_today_delivery_flg'] = $cursor->holi_after_today_delivery_flg ? '〇' : '×';
             }
-            if (is_bool($returnRow['private_home_flg'])) {
-                $returnRow['private_home_flg'] = $returnRow['private_home_flg'] ? '〇' : '×';
+            if (is_bool($cursor->private_home_flg)) {
+                $returnRow['private_home_flg'] = $cursor->private_home_flg ? '〇' : '×';
+            }
+            if (is_bool($cursor->handing_flg)) {
+                $returnRow['handing_flg'] = $cursor->handing_flg ? '〇' : '×';
             }
             // 慶弔区分
             $keichoTypeList = Config::get('delivery.keicho_type');
-            if (!is_null($returnRow['congratulation_kbn_flg'])) {
-                $returnRow['congratulation_kbn_flg'] = $keichoTypeList[$returnRow['congratulation_kbn_flg']];
+            if (!is_null($cursor->congratulation_kbn_flg)) {
+                $returnRow['congratulation_kbn_flg'] = $keichoTypeList[$cursor->congratulation_kbn_flg];
             }
             return $returnRow;
         };

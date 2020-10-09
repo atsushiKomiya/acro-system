@@ -33,4 +33,13 @@ class DepoDefaultListUseCase
 
         return $result;
     }
+
+    /**
+     * @return void
+     */
+    public function countDepoDefaultList($prefCd, $depoCd, $itemCategoryLargecd, $itemCategoryMediumcd ,$itemCd, $isConfig)
+    {
+        $count = $this->ViewAddressRepository->countDepoDefaultList($prefCd, $depoCd, $itemCategoryLargecd, $itemCategoryMediumcd ,$itemCd, $isConfig);
+        return $count;
+    }
 }

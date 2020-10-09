@@ -8,7 +8,7 @@ use Illuminate\Http\Exceptions\HttpResponseException;
 use Illuminate\Contracts\Validation\Validator;
 
 /**
- * デポ稼働確認承認リクエスト
+ * API用リクエスト
  */
 abstract class ApiRequest extends FormRequest
 {

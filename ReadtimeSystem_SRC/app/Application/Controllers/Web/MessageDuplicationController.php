@@ -26,6 +26,7 @@ class MessageDuplicationController extends WebController
     {
         parent::__construct();
         $this->middleware('check.direct.access');
+        $this->middleware('check.auth');
     }
 
     /**
@@ -152,8 +153,8 @@ class MessageDuplicationController extends WebController
 
         $searchEntity = new MessageSearchEntity();
         $searchEntity->messageType = $messageType;
-        $searchEntity->depoCdList = $depoCdList;
         $searchEntity->itemList = $itemList;
+        $searchEntity->depoCdList = $request->depoCdList;
         $searchEntity->addressList = $addressList;
         $searchEntity->deliveryDateType = $deliveryDateType;
         $searchEntity->deliveryDate     = $deliveryDate;
@@ -184,16 +185,27 @@ class MessageDuplicationController extends WebController
         }
         // 商品
         if($searchEntity->itemList) {
+            // カテゴリ大リスト
             $itemCollect = collect($searchEntity->itemList);
-            $itemCategoryLargeCdNameList = $itemCollect->unique('itemCategoryLargeCd')->map(function($item){
+            $itemCategoryLargeCdNameList = array_values($itemCollect->unique('itemCategoryLargeCd')->map(function($item){
                 return '【' . $item->itemCategoryLargeCd . '】' . $item->itemCategoryLargeName;
+            })->toArray());
+            // カテゴリ中リスト
+            $uniqueItemCMNList = $itemCollect->unique('itemCategoryMediumCd');
+            $filterItemCMNList = $uniqueItemCMNList->filter(function($value) {
+                return $value->itemCategoryMediumCd != null;
             });
-            $itemCategoryMediumCdNameList = $itemCollect->unique('itemCategoryMediumCd')->map(function($item){
+            $itemCategoryMediumCdNameList = array_values($filterItemCMNList->map(function($item) {
                 return '【' . $item->itemCategoryMediumCd . '】' . $item->itemCategoryMediumName;
+            })->toArray());
+            // 商品コードリスト
+            $uniqueItemCdList = $itemCollect->unique('itemCd');
+            $filterItemCdList = $uniqueItemCdList->filter(function($value) {
+                return $value->itemCd != null;
             });
-            $itemCdNameList = $itemCollect->unique('itemCd')->map(function($item){
+            $itemCdNameList = array_values($filterItemCdList->map(function($item) {
                 return '【' . $item->itemCd . '】' . $item->itemName;
-            });
+            })->toArray());
         }
         // 住所
         if($searchEntity->addressList) {

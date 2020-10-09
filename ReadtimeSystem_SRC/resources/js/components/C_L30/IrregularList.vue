@@ -20,7 +20,14 @@
           <!-- タイトル -->
           <div class="col-md-4">
             <span>タイトル</span>
-            <input class="form-control" name="searchTitle" v-model="mSearchParam.searchTitle" />
+            <input
+              class="form-control"
+              name="searchTitle"
+              v-model="mSearchParam.searchTitle"
+              @keypress.prevent.enter.exact="{}"
+              @keydown.prevent.enter.exact="{}"
+              @keyup.prevent.enter.exact="{}"
+            />
           </div>
           <!-- 用途 -->
           <div class="col-md-2">
@@ -54,121 +61,142 @@
           </div>
         </div>
         <!-- 行 -->
-        <div class="row mb-2">
-           <!-- 不可制御 -->
-          <div class="col-md-4">
-            <span>不可制御</span>
-            <div class="row div-indent">
-              <div class="col-md-6">
-                <input type="checkbox" id="isBeforeDeadlineChecked" name="searchIsBeforeDeadline" v-model="mSearchParam.searchIsBeforeDeadline" />
-                <label class="ml-2" for="isBeforeDeadlineChecked">前日締切不可</label>
+
+        <!-- accordion -->
+        <transition
+          name="accordion"
+          @before-leave="beforeLeave"
+          @leave="leave"
+          @enter="enter"
+          @before-enter="beforeEnter"
+        >
+          <div class="accordion--target" v-if="isAccordionOpen">
+            <div class="row mb-2">
+              <!-- 不可制御 -->
+              <div class="col-md-4">
+                <span>不可制御</span>
+                <div class="row div-indent">
+                  <div class="col-md-6">
+                    <input type="checkbox" id="isBeforeDeadlineChecked" name="searchIsBeforeDeadline" v-model="mSearchParam.searchIsBeforeDeadline" />
+                    <label class="ml-2" for="isBeforeDeadlineChecked">前日締切不可</label>
+                  </div>
+                  <div class="col-md-6">
+                    <input type="checkbox" id="isTodayDeliveryChecked" name="searchIsTodayDelivery" v-model="mSearchParam.searchIsTodayDelivery" />
+                    <label class="ml-2" for="isTodayDeliveryChecked">当日配送不可</label>
+                  </div>
+                  <div class="col-md-6">
+                    <input type="checkbox" id="isTimeSelectChecked" name="searchIsTimeSelect" v-model="mSearchParam.searchIsTimeSelect" />
+                    <label class="ml-2" for="isTimeSelectChecked">時間指定不可</label>
+                  </div>
+                  <div class="col-md-6">
+                    <input type="checkbox" id="isPrivateHomeChecked" name="searchIsPrivateHome" v-model="mSearchParam.searchIsPrivateHome" />
+                    <label class="ml-2" for="isPrivateHomeChecked">個人宅不可</label>
+                  </div>
+                </div>
               </div>
-              <div class="col-md-6">
-                <input type="checkbox" id="isTodayDeliveryChecked" name="searchIsTodayDelivery" v-model="mSearchParam.searchIsTodayDelivery" />
-                <label class="ml-2" for="isTodayDeliveryChecked">当日配送不可</label>
+
+              <!-- 商品 -->
+              <div class="col-md-5">
+
+                <div class="form-inline">
+                  <span>商品</span>
+                  <button type="button" class="btn btn-primary ml-5" @click="productlistOpen">選択</button>
+                </div>
+
+                <div class="row div-indent">
+                  <div class="col-md-3">カテゴリ大</div>
+                  <div class="col-md-9 under-line" >{{ dispItemCategoryLargeName }}<span>&nbsp;</span></div>
+                  <div class="col-md-3">カテゴリ中</div>
+                  <div class="col-md-9 under-line" >{{ dispItemCategoryMediumName }}<span>&nbsp;</span></div>
+                  <div class="col-md-3">商品</div>
+                  <div class="col-md-9 under-line" >{{ dispItemName }}<span>&nbsp;</span></div>
+                </div>
               </div>
-              <div class="col-md-6">
-                <input type="checkbox" id="isTimeSelectChecked" name="searchIsTimeSelect" v-model="mSearchParam.searchIsTimeSelect" />
-                <label class="ml-2" for="isTimeSelectChecked">時間指定不可</label>
+
+              <!-- お届け日 -->
+              <div class="col-md-3">
+
+                <div class="form-inline">
+                  <span>お届け日</span>
+                  <button type="button" class="btn btn-primary ml-5" @click="dateSelectOpen(true)">選択</button>
+                </div>
+
+                <div class="row div-indent">
+                  <div class="col-md-4">日付</div>
+                  <div class="col-md-8 under-line"><span>{{ dispDeliveryDate }}</span><span>&nbsp;</span></div>
+                  <div class="col-md-4">期間</div>
+                  <div class="col-md-8 under-line"><span>{{ dispDeliveryPeriod }}</span><span>&nbsp;</span></div>
+                  <div class="col-md-4">曜日</div>
+                  <div class="col-md-8 under-line"><span>{{ dispDeliveryWeek }}</span><span>&nbsp;</span></div>
+                </div>
               </div>
-              <div class="col-md-6">
-                <input type="checkbox" id="isPrivateHomeChecked" name="searchIsPrivateHome" v-model="mSearchParam.searchIsPrivateHome" />
-                <label class="ml-2" for="isPrivateHomeChecked">個人宅不可</label>
+            </div>
+            <!-- 行 -->
+            <div class="row mb-2">
+              <div class="col-md-4">
+                <!-- デポ名 -->
+                <div class="form-inline">
+                  <span>デポ名</span>
+                  <button type="button" class="btn btn-primary ml-5" @click="depoListOpen(false)">選択</button>
+                </div>
+                <div class="under-line mb-2">
+                  {{ dispDepoName }}<span>&nbsp;</span>
+                </div>
+                <!-- 振替先配送デポ名 -->
+                <div class="form-inline">
+                  <span>振替先配送デポ名</span>
+                  <button type="button" class="btn btn-primary ml-5" @click="depoListOpen(true)">選択</button>
+                </div>
+                <div class="under-line">
+                  {{ dispTransDepoName }}<span>&nbsp;</span>
+                </div>
+              </div>
+
+              <!-- 住所 -->
+              <div class="col-md-5">
+                <div class="form-inline">
+                  <span>住所</span>
+                  <button type="button" class="btn btn-primary ml-5" @click="addresslistOpen">選択</button>
+                </div>
+                <div class="row div-indent">
+                  <div class="col-md-3">郵便番号</div>
+                  <div class="col-md-9 under-line">{{ dispZipCd }}<span>&nbsp;</span></div>
+                  <div class="col-md-3">都道府県</div>
+                  <div class="col-md-9 under-line">{{ dispPrefName }}<span>&nbsp;</span></div>
+                  <div class="col-md-3">市区郡</div>
+                  <div class="col-md-9 under-line">{{ dispSiku }}<span>&nbsp;</span></div>
+                  <div class="col-md-3">町名</div>
+                  <div class="col-md-9 under-line">{{ dispTyou }}<span>&nbsp;</span></div>
+                </div>
+              </div>
+
+              <!-- 受注日 -->
+              <div class="col-md-3">
+                <div class="form-inline">
+                  <span>受注日</span>
+                  <button type="button" class="btn btn-primary ml-5" @click="dateSelectOpen(false)">選択</button>
+                </div>
+                <div class="row div-indent">
+                  <div class="col-md-4">日付</div>
+                  <div class="col-md-8 under-line"><span>{{ dispOrderDate }}</span><span>&nbsp;</span></div>
+                  <div class="col-md-4">期間</div>
+                  <div class="col-md-8 under-line"><span>{{ dispOrderPeriod }}</span><span>&nbsp;</span></div>
+                  <div class="col-md-4">曜日</div>
+                  <div class="col-md-8 under-line"><span>{{ dispOrderWeek }}</span><span>&nbsp;</span></div>
+                </div>
               </div>
             </div>
           </div>
+        </transition>
+        <!-- // accordion -->
 
-          <!-- 商品 -->
-          <div class="col-md-5">
-
-            <div class="form-inline">
-              <span>商品</span>
-              <button type="button" class="btn btn-primary ml-5" @click="productlistOpen">選択</button>
-            </div>
-
-            <div class="row div-indent">
-              <div class="col-md-3">カテゴリ大</div>
-              <div class="col-md-9 under-line" >{{ mSearchParam.searchItemCategoryLargename }}<span>&nbsp;</span></div>
-              <div class="col-md-3">カテゴリ中</div>
-              <div class="col-md-9 under-line" >{{ mSearchParam.searchItemCategoryMediumname }}<span>&nbsp;</span></div>
-              <div class="col-md-3">商品</div>
-              <div class="col-md-9 under-line" >{{ mSearchParam.searchItemName }}<span>&nbsp;</span></div>
-            </div>
-          </div>
-
-          <!-- お届け日 -->
-          <div class="col-md-3">
-
-            <div class="form-inline">
-              <span>お届け日</span>
-              <button type="button" class="btn btn-primary ml-5" @click="dateSelectOpen(true)">選択</button>
-            </div>
-
-            <div class="row div-indent">
-              <div class="col-md-4">日付</div>
-              <div class="col-md-8 under-line"><span>{{ dispDeliveryDate }}</span><span>&nbsp;</span></div>
-              <div class="col-md-4">期間</div>
-              <div class="col-md-8 under-line"><span>{{ dispDeliveryPeriod }}</span><span>&nbsp;</span></div>
-              <div class="col-md-4">曜日</div>
-              <div class="col-md-8 under-line"><span>{{ dispDeliveryWeek }}</span><span>&nbsp;</span></div>
-            </div>
-          </div>
+        <div class="accordion-info" @click="accordionToggle">
+          <a href="javascript:void(0)">
+            <div :class="{'arrow-up': isAccordionOpen, 'arrow-down': !isAccordionOpen}"></div>
+            {{ accordionInfo }}
+          </a>
         </div>
-        <!-- 行 -->
-        <div class="row mb-2">
-          <div class="col-md-4">
-            <!-- デポ名 -->
-            <div class="form-inline">
-              <span>デポ名</span>
-              <button type="button" class="btn btn-primary ml-5" @click="depoListOpen(false)">選択</button>
-            </div>
-            <div class="under-line mb-2">
-              <span v-html="mSearchParam.searchDeponame"></span><span>&nbsp;</span>
-            </div>
-            <!-- 振替先配送デポ名 -->
-            <div class="form-inline">
-              <span>振替先配送デポ名</span>
-              <button type="button" class="btn btn-primary ml-5" @click="depoListOpen(true)">選択</button>
-            </div>
-            <div class="under-line">
-              <span v-html="mSearchParam.searchTransDeponame"></span><span>&nbsp;</span>
-            </div>
-          </div>
 
-          <!-- 住所 -->
-          <div class="col-md-5">
-            <div class="form-inline">
-              <span>住所</span>
-              <button type="button" class="btn btn-primary ml-5" @click="addresslistOpen">選択</button>
-            </div>
-            <div class="row div-indent">
-              <div class="col-md-3">郵便番号</div>
-              <div class="col-md-9 under-line">{{ dispZipCd }}<span>&nbsp;</span></div>
-              <div class="col-md-3">都道府県</div>
-              <div class="col-md-9 under-line">{{ dispPrefName }}<span>&nbsp;</span></div>
-              <div class="col-md-3">市区郡</div>
-              <div class="col-md-9 under-line">{{ dispSiku }}<span>&nbsp;</span></div>
-              <div class="col-md-3">町名</div>
-              <div class="col-md-9 under-line">{{ dispTyou }}<span>&nbsp;</span></div>
-            </div>
-          </div>
-
-          <!-- 受注日 -->
-          <div class="col-md-3">
-            <div class="form-inline">
-              <span>受注日</span>
-              <button type="button" class="btn btn-primary ml-5" @click="dateSelectOpen(false)">選択</button>
-            </div>
-            <div class="row div-indent">
-              <div class="col-md-4">日付</div>
-              <div class="col-md-8 under-line"><span>{{ dispOrderDate }}</span><span>&nbsp;</span></div>
-              <div class="col-md-4">期間</div>
-              <div class="col-md-8 under-line"><span>{{ dispOrderPeriod }}</span><span>&nbsp;</span></div>
-              <div class="col-md-4">曜日</div>
-              <div class="col-md-8 under-line"><span>{{ dispOrderWeek }}</span><span>&nbsp;</span></div>
-            </div>
-          </div>
-        </div>
         <div class="row">
           <div class="col-md-6"></div>
           <div class="col-md-6 text-right">
@@ -194,7 +222,7 @@
           <label class="control-label">件</label>
         </div>
       </div>
-      <div class="sticky-table div-irregular-table">
+      <div class="sticky-table div-irregular-table" v-if="this.mIrregularList.length != 0">
         <table class="table-striped table-responsive-stack">
           <thead>
             <tr>
@@ -217,7 +245,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr v-for="(model, index) in mIrregularList" :key="index">
+            <tr v-for="(model, index) in mIrregularList" :key="index" :class="{'disabled-row': !model.is_valid}">
               <td class="td-irregular-id"><a @click="irregularConfigLink(model)" href="#!">{{ model.irregular_id }}</a></td>
               <td class="td-irregular-type">{{ irregularTypeTrans(model.irregular_type) }}</td>
               <td class="td-title">{{ model.title }}</td>
@@ -263,6 +291,8 @@ export default {
         searchTitle: '',
         searchDepocd: null,
         searchDeponame: null,
+        searchChoiceDepoList: [],
+        searchChoiceTransDepoList: [],
         searchTransDeponame: null,
         searchTransDepocd: null,
         searchDisplayType: 0,
@@ -272,6 +302,7 @@ export default {
         searchItemCategoryMediumname: null,
         searchItemCd: null,
         searchItemName: null,
+        searchItemList: [],
         searchOrderType: 0,
         searchOrderDate: null,
         searchOrderPeriodStart: null,
@@ -300,7 +331,7 @@ export default {
     },
     irregularConfigClassificationList: Object,
     cUseList: Array,
-    validList: Object,
+    validList: Array,
     deliveryDateList: Object,
     irregularList: Array,
   },
@@ -309,6 +340,7 @@ export default {
       mIsSearch: false,
       mSearchParam: this.searchParam,
       mIrregularList: this.irregularList,
+      mIrregularCount: 0,
       mDeliveryYear: this.getDateSplit(this.searchParam.searchDeliveryDate, 1),
       mDeliveryMonth: this.getDateSplit(this.searchParam.searchDeliveryDate, 2),
       mDeliveryDate: this.getDateSplit(this.searchParam.searchDeliveryDate, 3),
@@ -331,53 +363,87 @@ export default {
       mOrderEndDate: this.getDateSplit(this.searchParam.searchOrderPeriodEnd, 3),
       mOrderWeekList: this.searchParam.searchOrderWeekList,
       mOrderHolidayList: this.searchParam.searchOrderHolidayList,
-      
+      isAccordionOpen: false,
+      accordionInfo: '条件詳細',
+      itemNameList: [],
+      itemCategoryLargeNameList: [],
+      itemCategoryMediumNameList: [],
     };
   },
   methods: {
     /** 検索条件リセット */
     reset: function() {
-        this.mSearchParam.searchIrregularConfig = '';
-        this.mSearchParam.searchTitle = '';
-        this.mSearchParam.searchDepocd = null;
-        this.mSearchParam.searchDeponame = null;
-        this.mSearchParam.searchTransDeponame = null;
-        this.mSearchParam.searchTransDepocd = null;
-        this.mSearchParam.searchDisplayType = 0;
-        this.mSearchParam.searchItemCategoryLargecd = null;
-        this.mSearchParam.searchItemCategoryLargename = null;
-        this.mSearchParam.searchItemCategoryMediumcd = null;
-        this.mSearchParam.searchItemCategoryMediumname = null;
-        this.mSearchParam.searchItemCd = null;
-        this.mSearchParam.searchItemName = null;
-        this.mSearchParam.searchOrderType = 0;
-        this.mSearchParam.searchOrderDate = null;
-        this.mSearchParam.searchOrderPeriodStart = null;
-        this.mSearchParam.searchOrderPeriodEnd = null;
-        this.mSearchParam.searchOrderWeekList = [];
-        this.mOrderWeekList = [];
-        this.mSearchParam.searchOrderHolidayList = [];
-        this.mOrderHolidayList = [];
-        this.mSearchParam.searchZipcdList = [];
-        this.mSearchParam.searchPrefList = [];
-        this.mSearchParam.searchPrefNameList = [];
-        this.mSearchParam.searchSikuList = [];
-        this.mSearchParam.searchTyouList = [];
-        this.mSearchParam.searchCUseCd = '';
-        this.mSearchParam.searchIsValid = '';
-        this.mSearchParam.searchDeliveryTime = '0';
-        this.mSearchParam.searchDeliveryDateType = 0;
-        this.mSearchParam.searchDeliveryDate = null;
-        this.mSearchParam.searchDeliveryPeriodStart = null;
-        this.mSearchParam.searchDeliveryPeriodEnd = null;
-        this.mSearchParam.searchDeliveryWeekList = [];
-        this.mDeliveryWeekList = [];
-        this.mSearchParam.searchDeliveryHolidayList = [];
-        this.mDeliveryHolidayList = [];
-        this.mSearchParam.searchIsBeforeDeadline = false;
-        this.mSearchParam.searchIsTodayDelivery = false;
-        this.mSearchParam.searchIsTimeSelect = false;
-        this.mSearchParam.searchIsPrivateHome = false;
+      this.mSearchParam.searchIrregularConfig = '';
+      this.mSearchParam.searchTitle = '';
+      this.mSearchParam.searchDepocd = null;
+      this.mSearchParam.searchDeponame = null;
+      this.mSearchParam.searchChoiceDepoList = [];
+      this.mSearchParam.searchChoiceTransDepoList = [];
+      this.mSearchParam.searchTransDeponame = null;
+      this.mSearchParam.searchTransDepocd = null;
+      this.mSearchParam.searchDisplayType = 0;
+      this.mSearchParam.searchItemCategoryLargecd = null;
+      this.mSearchParam.searchItemCategoryLargename = null;
+      this.mSearchParam.searchItemCategoryMediumcd = null;
+      this.mSearchParam.searchItemCategoryMediumname = null;
+      this.mSearchParam.searchItemCd = null;
+      this.mSearchParam.searchItemName = null;
+      this.mSearchParam.searchItemList = [];
+      this.itemNameList = [];
+      this.itemCategoryLargeNameList = [];
+      this.itemCategoryMediumNameList = [];
+      this.mSearchParam.searchOrderType = 0;
+      // 受注日:日付
+      this.mOrderYear = null;
+      this.mOrderMonth = null;
+      this.mOrderDate = null;
+      this.mSearchParam.searchOrderDate = null;
+      // 受注日:期間
+      this.mOrderStartYear = null;
+      this.mOrderStartMonth = null;
+      this.mOrderStartDate = null;
+      this.mOrderEndYear = null;
+      this.mOrderEndMonth = null;
+      this.mOrderEndDate = null;
+      this.mSearchParam.searchOrderPeriodStart = null;
+      this.mSearchParam.searchOrderPeriodEnd = null;
+
+      this.mSearchParam.searchOrderWeekList = [];
+      this.mOrderWeekList = [];
+      this.mSearchParam.searchOrderHolidayList = [];
+      this.mOrderHolidayList = [];
+      this.mSearchParam.searchZipcdList = [];
+      this.mSearchParam.searchPrefList = [];
+      this.mSearchParam.searchPrefNameList = [];
+      this.mSearchParam.searchSikuList = [];
+      this.mSearchParam.searchTyouList = [];
+      this.mSearchParam.searchCUseCd = '';
+      this.mSearchParam.searchIsValid = '';
+      this.mSearchParam.searchDeliveryTime = '0';
+      this.mSearchParam.searchDeliveryDateType = 0;
+      // お届け日:日付
+      this.mDeliveryYear = null;
+      this.mDeliveryMonth = null;
+      this.mDeliveryDate = null;
+      this.mSearchParam.searchDeliveryDate = null;
+      // お届け日:期間
+      this.mDeliveryStartYear = null;
+      this.mDeliveryStartMonth = null;
+      this.mDeliveryStartDate = null;
+      this.mDeliveryEndYear = null;
+      this.mDeliveryEndMonth = null;
+      this.mDeliveryEndDate = null;
+      this.mSearchParam.searchDeliveryPeriodStart = null;
+      this.mSearchParam.searchDeliveryPeriodEnd = null;
+
+      this.mSearchParam.searchDeliveryWeekList = [];
+      this.mDeliveryWeekList = [];
+      this.mSearchParam.searchDeliveryHolidayList = [];
+      this.mDeliveryHolidayList = [];
+      this.mSearchParam.searchIsBeforeDeadline = false;
+      this.mSearchParam.searchIsTodayDelivery = false;
+      this.mSearchParam.searchIsTimeSelect = false;
+      this.mSearchParam.searchIsPrivateHome = false;
       this.$forceUpdate();
     },
     /** 検索ボタン */
@@ -401,9 +467,29 @@ export default {
         this.$root.$refs.appProgress.busy(false);
       });
     },
+    /** 件数取得 */
+    count: async function (e) {
+      this.$root.$refs.appProgress.busy(true);
+      await Repository.countIrregularList(
+        this.mSearchParam
+      ).then(response => {
+        var result = response.data;
+        if(result.isSuccess) {
+          this.mIrregularCount = result.data;
+        } else {
+          alert(result.message);
+        }
+      }).catch(error => {
+        var data = error.response.data;
+        alert(data.message)
+      }).finally(() => {
+        this.$root.$refs.appProgress.busy(false);
+      });
+    },
     /** CSV出力 */
-    downloadSetup: function(e) {
-      if(this.mIrregularList.length == 0) {
+    downloadSetup: async function(e) {
+      await this.count();
+      if(this.mIrregularCount == 0) {
         alert('検索結果が0件のため、ダウンロードできません。');
         return false;
       }
@@ -433,32 +519,62 @@ export default {
         // 通常配送デポ
         func = this.searchDepoRegist;
       }
-      childWinOpen(this.$root.URL_CONST.C_L50, undefined, func);
+      childWinOpen(this.$root.URL_CONST.C_L51, undefined, func);
+      // childWinOpen(this.$root.URL_CONST.C_L50, undefined, func);
     },
     /** デポ選択画面内容反映 */
-    searchDepoRegist: function(depo) {
-     this.mSearchParam.searchDepocd = depo.depocd;
-      this.mSearchParam.searchDeponame = depo.deponame;
+    searchDepoRegist: function(depoList) {
+      // 追加
+      this.mSearchParam.searchChoiceDepoList = [];
+      depoList.forEach(addDepo => {
+        var depoparam = {
+          'depocd': addDepo.depocd,
+          'deponame': addDepo.deponame,
+        }
+        this.mSearchParam.searchChoiceDepoList.push(depoparam);
+      });
     },
     /** 振替先用デポ選択画面内容反映 */
-    searchTransDepoRegist: function(depo) {
-      this.mSearchParam.searchTransDepocd = depo.depocd;
-      this.mSearchParam.searchTransDeponame = depo.deponame;
+    searchTransDepoRegist: function(depoList) {
+      // 追加
+      this.mSearchParam.searchChoiceTransDepoList = [];
+      depoList.forEach(addDepo => {
+        var depoparam = {
+          'depocd': addDepo.depocd,
+          'deponame': addDepo.deponame,
+        }
+        this.mSearchParam.searchChoiceTransDepoList.push(depoparam);
+      });
     },
     /** 商品選択画面表示 */
     productlistOpen: function() {
-      childWinOpen(this.$root.URL_CONST.C_L52, undefined, this.searchProductRegist);
+      var params = new Array();
+      params['isList'] = [true];
+      childWinOpen(this.$root.URL_CONST.C_L53, params, this.searchProductRegist);
+      // childWinOpen(this.$root.URL_CONST.C_L52, undefined, this.searchProductRegist);
     },
     /** 商品選択内容反映 */
-    searchProductRegist: function(searchItemCategoryLargecd, searchItemCategoryLargename, searchItemCategoryMediumcd, 
-    searchItemCategoryMediumname, searchItemCd, searchItemName) {
-      this.mSearchParam.searchItemCategoryLargecd = searchItemCategoryLargecd;
-      this.mSearchParam.searchItemCategoryLargename = searchItemCategoryLargename;
-      this.mSearchParam.searchItemCategoryMediumcd = searchItemCategoryMediumcd;
-      this.mSearchParam.searchItemCategoryMediumname = searchItemCategoryMediumname;
-      this.mSearchParam.searchItemCd = searchItemCd;
-      this.mSearchParam.searchItemName = searchItemName;
-      this.$forceUpdate();
+    searchProductRegist: function(itemCategoryLargeCd,itemCategoryLargeName,itemCategoryMediumCd,itemCategoryMediumName,itemList) {
+      this.mSearchParam.searchItemList = [];
+      this.itemNameList = [];
+      this.itemCategoryLargeNameList = [];
+      this.itemCategoryMediumNameList = [];
+      itemList.forEach(addItem => {
+        if(addItem.itemCd != null) {
+          // 商品単位での選択がされた場合
+          this.itemNameList.push(addItem.itemName);
+        } else {
+          // カテゴリ大、カテゴリ中の選択がされた場合
+          if(addItem.itemCategoryMediumCd == null) {
+            // カテゴリ大
+            this.itemCategoryLargeNameList.push(addItem.itemCategoryLargeName)
+          } else {
+            // カテゴリ中
+            this.itemCategoryMediumNameList.push(addItem.itemCategoryMediumName)
+          }
+        }
+        this.mSearchParam.searchItemList.push({ ...addItem });
+      });
     },
     /** 日付選択子画面表示 */
     dateSelectOpen:function(isDeliveryDate){
@@ -539,19 +655,19 @@ export default {
       var tyouList     = [];
       
       Object.values(address).forEach((value, i) => {
-        if(zipcdList.indexOf(value.zipcode) == -1){
+        if(value.zipcode != null && zipcdList.indexOf(value.zipcode) == -1){
           zipcdList.push(value.zipcode);
         } 
-        if(prefList.indexOf(value.pref) == -1){
+        if(value.pref != null && prefList.indexOf(value.pref) == -1){
           prefList.push(value.pref);
         }
-        if(prefNameList.indexOf(value.prefName) == -1){
+        if(value.prefName != null && prefNameList.indexOf(value.prefName) == -1){
           prefNameList.push(value.prefName);
         }
-        if(sikuList.indexOf(value.siku) == -1){
+        if(value.siku != null && sikuList.indexOf(value.siku) == -1){
           sikuList.push(value.siku);
         }
-        if(tyouList.indexOf(value.tyou) == -1){
+        if(value.tyou != null && tyouList.indexOf(value.tyou) == -1){
           tyouList.push(value.tyou);
         }
       });
@@ -630,9 +746,61 @@ export default {
       }
 
       return result;
+    },
+    accordionToggle: function(){
+      this.isAccordionOpen = !this.isAccordionOpen;
+    },
+    beforeEnter: function(el) {
+      el.style.height = '0';
+    },
+    enter: function(el) {
+      el.style.height = '0';
+      el.style.height = el.scrollHeight + 'px';
+    },
+    beforeLeave: function(el) {
+      el.style.height = el.scrollHeight + 'px';
+    },
+    leave: function(el) {
+      el.style.height = '0';
     }
   },
   computed: {
+    /** デポ名表示 */
+    dispDepoName: function() {
+      var result = '';
+      var deponamelist = [];
+      if(this.mSearchParam.searchChoiceDepoList) {
+        this.mSearchParam.searchChoiceDepoList.forEach(v => {
+          deponamelist.push(v.deponame);
+        });
+        result = deponamelist.join(',');
+      }
+      return result;
+    },
+    /** デポ名表示 */
+    dispTransDepoName: function() {
+      var result = '';
+      var deponamelist = [];
+      if(this.mSearchParam.searchChoiceTransDepoList) {
+        this.mSearchParam.searchChoiceTransDepoList.forEach(v => {
+          deponamelist.push(v.deponame);
+        });
+        result = deponamelist.join(',');
+      }
+      return result;
+    },
+    /** カテゴリ大名表示 */
+    dispItemCategoryLargeName: function() {
+      return this.itemCategoryLargeNameList.join(',');
+    },
+    /** カテゴリ中名表示 */
+    dispItemCategoryMediumName: function() {
+      return this.itemCategoryMediumNameList.join(',');
+    },
+    /** 商品名表示 */
+    dispItemName: function() {
+      return this.itemNameList.join(',');
+    },
     /** お祝い用途絞り込み */
     cUseCelebList:function(){
       var list = this.cUseList.filter(function(item){
@@ -696,7 +864,7 @@ export default {
       return result;
     },
     /** 受注曜日表示 */
-    dispOrderWeek: function() {
+    dispOrderPeriod: function() {
       var result = '';
       if(this.mSearchParam.searchOrderPeriodStart && this.mSearchParam.searchOrderPeriodEnd) {
         var from = moment(this.mSearchParam.searchOrderPeriodStart,'YYYY-MM-DD').format('YYYY/M/D');
@@ -707,7 +875,7 @@ export default {
 
     },
     /** 受注期間表示 */
-    dispOrderPeriod: function() {
+    dispOrderWeek: function() {
       var resultList = [];
 
       if(this.mOrderWeekList) {

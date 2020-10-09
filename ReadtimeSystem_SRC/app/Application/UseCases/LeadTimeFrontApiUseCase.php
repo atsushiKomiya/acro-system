@@ -94,8 +94,8 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
                         $this->request->input('procKbn') == AppConst::PROCKBN['ORDER_CHECK']
                         && (
                             $data->delivery_date_type == null
-                            || ($data->delivery_date_type == AppConst::DELIVERY_DATE_TYPE['DAY'] && $data->delivery_date == $this->request->input('aDate'))
-                            || ($data->delivery_date_type == AppConst::DELIVERY_DATE_TYPE['PERIOD'] && $data->delivery_date_from <= $this->request->input('aDate') && $data->delivery_date_to >= $this->request->input('aDate'))
+                            || ($data->delivery_date_type == AppConst::DELIVERY_DATE_TYPE['DAY'] && $data->delivery_date == date('Y-m-d', strtotime($this->request->input('aDate'))))
+                            || ($data->delivery_date_type == AppConst::DELIVERY_DATE_TYPE['PERIOD'] && $data->delivery_date_from <= date('Y-m-d', strtotime($this->request->input('aDate'))) && $data->delivery_date_to >= date('Y-m-d', strtotime($this->request->input('aDate'))))
                             || ($data->delivery_date_type == AppConst::DELIVERY_DATE_TYPE['WEEK'] && $data->date_type == AppConst::DATE_TYPE['DELIVERY_DATE'] && isset($this->delivery_date_week[$this->api_date['Ymd']]) && $data->public_holiday_status == $this->delivery_date_week[$this->api_date['Ymd']]->public_holiday_status)
                         )
                     ) {
@@ -204,6 +204,11 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
             if (!in_array($datas->depo_cd, $use_today_cal_list_tmp)
                 || ($this->request->input('procKbn') == AppConst::PROCKBN['ORDER_CHECK'] && ($this->api_time > $datas->today_time_deadline1 || $this->api_time > $datas->today_time_deadline2))
             ) {
+                if ($this->api_time < $datas->today_time_deadline1) {
+                    // 当日配送締時間１，２を格納
+                    $this->wk['today_time_deadline1'] = $datas->today_time_deadline1;
+                    $this->wk['today_time_deadline2'] = $datas->today_time_deadline2;
+                }
                 continue;
             }
             $candidate_list[] = $datas;
@@ -641,6 +646,7 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
         ];
         // 当日配送可能リスト作成
         $use_today_delivery = $this->_getSpDepoNextCalAllocation((object)$cond, $this->sysid);
+        // ここで付き合わせ TODO
         // [2] 当日配送可能リスト件数チェック
         $this->logger->info("##[2] 当日配送可能リスト件数チェック", ['file' => basename(__FILE__), 'line' => __LINE__]);
         // サプライズ配送可能デポリスト
@@ -775,7 +781,7 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
                 $res_is_today_deadline_undeliv_flg,
                 $res_is_time_select_undeliv_flg,
                 $res_is_personal_delivery_flg
-            ) = $this->irNotDeliveryCheck($datas->depo_cd, $this->request->input('aDate'));
+            ) = $this->irNotDeliveryCheck($datas->depo_cd, date("Y-m-d", strtotime($this->request->input('aDate'))));
             // 配送不可エラーフラグがtrue の場合
 
             if ($res_flg === true) {
@@ -857,9 +863,15 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
     {
         // [1] 有効デポリスト処理
         $this->logger->info("##[1] 有効デポリスト処理", ['file' => basename(__FILE__), 'line' => __LINE__]);
+        // サプライズデポなどの非対象デポを後ほど除外するためのリスト
+        $unset_depo_list = [];
+        // 受注可能デポリスト初期化処理
+        if ($this->use_order_depo_list == null) {
+            $this->use_order_depo_list = [];
+        }
         foreach ($this->use_depo_list as $key => $datas) {
             // 最短届日
-            $this->use_depo_list[$key]->short_delivery_date = date('Y-m-d');
+            $this->use_depo_list[$key]->short_delivery_date = date('Y/m/d');
             // 10.エンタメデポカレンダー最短作業日取得
             $cond = [
                 'depo_cd'  => $datas->depo_cd,
@@ -867,6 +879,12 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
                 'api_date_nextday' => $this->api_date_nextday['Ymd']
             ];
             $depos = $this->_getEtmDepoCalWorkDay((object)$cond, $this->sysid);
+
+            // デポ除外処理
+            if (count($depos) == 0 || $datas->display_group_type == 4) {
+                // エンタメ日検索でヒットしなかったデポと、そもそもサプライズデポを除外リストへ登録
+                $unset_depo_list[] = $datas->depo_cd;
+            }
             foreach ($depos as $data) {
                 // 取得した日付を判定し有効デポ情報に設定
                 if (
@@ -886,7 +904,7 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
                             $this->use_depo_list[$key]->short_work_date = $data->delivery_date;
                             // 最短可能作業日に有効デポ情報のデポリードタイムを足した日付を最短届日として有効デポ情報に設定
                             $leadtime = $this->use_depo_list[$key]->depo_lead_time;
-                            $this->use_depo_list[$key]->short_delivery_date = date('Y-m-d', strtotime("+{$leadtime} day", strtotime($this->use_depo_list[$key]->short_work_date)));
+                            $this->use_depo_list[$key]->short_delivery_date = date('Y/m/d', strtotime("+{$leadtime} day", strtotime($this->use_depo_list[$key]->short_work_date)));
                             // デポカレンダー期間注釈リストに”申込画面表示注釈（表示）”の値を設定
                             $this->res_depo_cal_transfer_list[] = $data;
                             break;
@@ -895,7 +913,7 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
                             $this->use_depo_list[$key]->short_delivery_days = $data->delivery_date;
                             // 最短可能作業日に有効デポ情報のデポリードタイムを足した日付を最短届日として有効デポ情報に設定
                             $leadtime = $this->use_depo_list[$key]->depo_lead_time;
-                            $this->use_depo_list[$key]->short_delivery_date = date('Y-m-d', strtotime("+{$leadtime} day", strtotime($this->use_depo_list[$key]->short_work_date)));
+                            $this->use_depo_list[$key]->short_delivery_date = date('Y/m/d', strtotime("+{$leadtime} day", strtotime($this->use_depo_list[$key]->short_work_date)));
                             // 取得した”前日締切締め時間”で有効デポ情報の”翌日配送締切時間を上書
                             $this->use_depo_list[$key]->next_day_time_deadline = $data->before_deadline_limit_time;
                             // デポカレンダー期間注釈リストに”申込画面表示注釈（表示）”の値を設定
@@ -911,21 +929,33 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
                 }
             }
         }
+
+        // 除外対象のデポを有効デポリストから除外する
+        if (count($unset_depo_list) > 0)  {
+            foreach($this->use_depo_list as $key => $depo) {
+                if (in_array($depo->depo_cd, $unset_depo_list)) {
+                    unset($this->use_depo_list[$key]);
+                }
+            }
+        }
         // [2] 最短届日が早い順にソート
         $this->logger->info("##[2] 最短届日が早い順にソート", ['file' => basename(__FILE__), 'line' => __LINE__]);
         foreach ($this->use_depo_list as $datas) {
             $short_delivery_date[] = $datas->short_delivery_date;
         }
-        array_multisort(
-            $short_delivery_date,
-            SORT_ASC,
-            SORT_NUMERIC,
-            $this->use_depo_list
-        );
+
+        if (count($this->use_depo_list) > 0) {
+            array_multisort(
+                $short_delivery_date,
+                SORT_ASC,
+                SORT_NUMERIC,
+                $this->use_depo_list
+            );
+        }
 
         // 最短届日 > リクエストパラメーター_お届け希望日”のデータは破棄
         foreach ($this->use_depo_list as $key => $datas) {
-            if ($this->request->input('procKbn') == AppConst::PROCKBN['ORDER_CHECK'] && $datas->short_delivery_date > $this->request->input('aDate')) {
+            if ($this->request->input('procKbn') == AppConst::PROCKBN['ORDER_CHECK'] && $datas->short_delivery_date > date("Y/m/d", strtotime($this->request->input('aDate')))) {
                 unset($this->use_depo_list[$key]);
             }
         }
@@ -939,7 +969,7 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
             $date = date('Y-m-d', strtotime($datas->short_delivery_date));
             // リクエストパラメーター_処理区分 = 2”の場合はデポCDとリクエストパラメータ_お届け希望日をパラメータで実行
             if ($this->request->input('procKbn') == AppConst::PROCKBN['ORDER_CHECK']) {
-                $date = $this->request->input('aDate');
+                $date = date("Y-m-d", strtotime($this->request->input('aDate')));
             }
             // 12．イレギュラー_受注不可チェック処理
             list(
@@ -986,7 +1016,7 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
             $date = date('Y-m-d', strtotime($datas->short_delivery_date));
             // リクエストパラメーター_処理区分 = 2”の場合はデポCDとリクエストパラメータ_お届け希望日をパラメータで実行
             if ($this->request->input('procKbn') == AppConst::PROCKBN['ORDER_CHECK']) {
-                $date = $this->request->input('aDate');
+                $date = date("Y-m-d", strtotime($this->request->input('aDate')));
             }
             // 13．イレギュラー_配送不可チェック処理
             list(
@@ -1099,7 +1129,7 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
             $this->wk['next_day_time_deadline'] = $comp_etm_depo->next_day_time_deadline;
             $this->wk['next_day_time_type'] = $comp_etm_depo->next_day_time_type;
             $this->wk['short_delivery_date'] = $comp_etm_depo->short_delivery_date;
-            $this->wk['short_delivery_days'] = $this->dayDiff($this->api_date['Y-m-d'], $comp_etm_depo->short_delivery_date);
+            $this->wk['short_delivery_days'] = $this->dayDiff($this->api_date['Y/m/d'], $comp_etm_depo->short_delivery_date);
             $this->wk['next_day_depo_cd'] = $comp_etm_depo->depo_cd;
         } else {
             $candidate_etm_depo = current($candidate_etm_depo);
@@ -1108,7 +1138,7 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
             $this->wk['next_day_time_deadline'] = $candidate_etm_depo->next_day_time_deadline;
             $this->wk['next_day_time_type'] = $candidate_etm_depo->next_day_time_type;
             $this->wk['short_delivery_date'] = $candidate_etm_depo->short_delivery_date;
-            $this->wk['short_delivery_days'] = $this->dayDiff($this->api_date['Y-m-d'], $candidate_etm_depo->short_delivery_date);
+            $this->wk['short_delivery_days'] = $this->dayDiff($this->api_date['Y/m/d'], $candidate_etm_depo->short_delivery_date);
             $this->wk['next_day_depo_cd'] = $candidate_etm_depo->depo_cd;
         }
         return true;
@@ -1180,21 +1210,25 @@ class LeadTimeFrontApiUseCase extends LeadTimeApiUseCase
                     if (empty($datas)) {
                         break;
                     }
-                    foreach ($datas as $items) {
-                        // イレギュラーIDが既に存在すれば次へ
-                        if (!isset($items['irregular_id']) || in_array($items['irregular_id'], $unique_id)) {
-                            continue;
+                    if (is_array($datas)) {
+                        foreach ($datas as $items) {
+                            // イレギュラーIDが既に存在すれば次へ
+                            if (!isset($items['irregular_id']) || in_array($items['irregular_id'], $unique_id)) {
+                                continue;
+                            }
+                            $unique_id[] = $items['irregular_id'];
+                            $res[] = $items[$key];
                         }
-                        $unique_id[] = $items['irregular_id'];
-                        $res[] = $items[$key];
+                        // イレギュラーID昇順にソート
+                        array_multisort(
+                            $unique_id,
+                            SORT_ASC,
+                            SORT_NUMERIC,
+                            $res
+                        );
+                    } else {
+                        $res[] = $datas;
                     }
-                    // イレギュラーID昇順にソート
-                    array_multisort(
-                        $unique_id,
-                        SORT_ASC,
-                        SORT_NUMERIC,
-                        $res
-                    );
                     // デポカレンダー期間注釈リストがあれば文字列で重複チェック
                     if ($key == 'anno_period' && count($anno_periods) > 0) {
                         foreach ($anno_periods as $str) {

@@ -66,6 +66,35 @@ class CalendarConfirmApiController extends ApiController
     }
     
     /**
+     * デポ稼働日確認リスト件数取得
+     * @param Request $request
+     * @return void
+     */
+    public function count(CalendarConfirmSearchRequest $request, DepoCalAprInfoUseCase $depoCalAprInfoUseCase)
+    {
+        $res = new BaseApiResponse();
+        try {
+            // 検索処理
+            $calendarList = $depoCalAprInfoUseCase->countDepoCalendarList(
+                $request->searchYm,
+                $request->searchPrefCd,
+                $request->searchIsNotApproval,
+                $request->searchIsNotConfirm,
+                $request->searchDisplayType
+            );
+            // 返却処理
+            $res->apiSuccessful();
+            $res->data = $calendarList;
+        } catch (Exception $ex) {
+            Log::error($ex->getMessage());
+            $res->apiServerError(500, Lang::get('error.C_L10.search'));
+        }
+
+        // 返却
+        return $res;
+    }
+    
+    /**
      * CSVダウンロード
      *
      * @param Request $request
@@ -81,7 +110,7 @@ class CalendarConfirmApiController extends ApiController
         // CSV作成
         $callback = function () use ($request, $csvUsecase) {
             $targetYm = $request->searchYm ?? null;
-            $prefCd = $request->searchPrefCd ?? 0;
+            $prefCd = $request->searchPrefCd;
             $isNotApproval = $request->searchIsNotApproval ?? false;
             $isNotConfirm = $request->searchIsNotConfirm ?? false;
             $displayType = $request->searchDisplayType ?? 0;
@@ -122,7 +151,7 @@ class CalendarConfirmApiController extends ApiController
             $from = $carbon->firstOfMonth()->format('Ymd');
             $to = $carbon->endOfMonth()->format('Ymd');
 
-            $orderCsvExpUsecase->chgDepoInfoCsv($depoCdList, null, null, $from, $to);
+            $orderCsvExpUsecase->chgDepoInfoCsv($depoCdList, null, null, $from, $to, null);
 
             // コミット
             DB::commit();

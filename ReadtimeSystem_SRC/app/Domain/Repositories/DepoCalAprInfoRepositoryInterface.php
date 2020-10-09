@@ -18,7 +18,7 @@ interface DepoCalAprInfoRepositoryInterface
 
     public function getMaxDate($depocd);
 
-    public function deleteDepoCalAprInfo($depocd, $deliveryDate);
+    public function deleteDepoCalAprInfo($depocd, $deliveryDate, $userId);
 
     public function inputDepoCalAprInfo($depoCalAprInfoArray);
 
@@ -52,6 +52,19 @@ interface DepoCalAprInfoRepositoryInterface
      * @return array
      */
     public function findDepoCalendarList(string $ym, ?int $pref, bool $isNotApproval, bool $isNotConfirm, int $displayType, array $ymdList): array;
+
+    /**
+     * デポカレンダー一覧件数取得
+     *
+     * @param string $ym
+     * @param ?integer $pref
+     * @param boolean $isNotApproval
+     * @param boolean $isNotConfirm
+     * @param integer $displayType
+     * @param array $ymdList
+     * @return int
+     */
+    public function countDepoCalendarList(string $ym, ?int $pref, bool $isNotApproval, bool $isNotConfirm, int $displayType, array $ymdList): int;
 
     /**
      * デポカレンダー一覧CSV取得用
@@ -119,11 +132,11 @@ interface DepoCalAprInfoRepositoryInterface
     public function deleteDepoCalAprUnnecessary($unnecessaryDepoList);
 
     /**
-     * 【C_LB_03】CreanUPバッチ
+     * 【C_LB_03】CleanUPバッチ
      * デポカレンダ－承認情報論理削除
      * @return void
      */
-    public function deleteDepoCalAprInfoCreanUp($criterionDate, $userId);
+    public function deleteDepoCalAprInfoCleanUp($criterionDate, $userId);
 
     /**
      * 申込画面表示注釈（表示）一覧取得

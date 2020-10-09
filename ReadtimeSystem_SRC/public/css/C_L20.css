@@ -51,7 +51,6 @@ table tbody tr td {
   position: sticky;
   left: 0;
   background: #ffffff !important;
-  z-index: 6 !important;
   text-align: center;
 }
 
@@ -249,6 +248,12 @@ table tbody tr td {
 .private_home_flg-base,
 .td-private_home_flg,
 .th-private_home_flg {
+  width: 110px;
+}
+
+.handing_flg-base,
+.td-handing_flg,
+.th-handing_flg {
   width: 110px;
 }
 

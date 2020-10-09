@@ -94,13 +94,13 @@ class DepoCalInfoUseCase
     }
 
     /**
-     * 【C_LB_03】CreanUPバッチ
+     * 【C_LB_03】CleanUPバッチ
      * デポカレンダ－情報削除
      * @return void
      */
-    public function deleteDepoCalInfoCreanUp($criterionDate)
+    public function deleteDepoCalInfoCleanUp($criterionDate)
     {
-        $data = $this->iDepoCalInfoRepository->deleteDepoCalInfoCreanUp($criterionDate);
+        $data = $this->iDepoCalInfoRepository->deleteDepoCalInfoCleanUp($criterionDate);
 
         return $data;
     }

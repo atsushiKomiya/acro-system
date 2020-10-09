@@ -54,9 +54,10 @@ class DefaultCsvImportUseCase extends BaseCsvImportUseCase
      * Leadtimeタブ用のCSV取り込み処理
      *
      * @param string $fileName
+     * @param integer $displayType
      * @return CsvImportResultEntity
      */
-    public function leadtimeCsv(string $fileName): CsvImportResultEntity
+    public function leadtimeCsv(string $fileName, $displayType): CsvImportResultEntity
     {
         $parseErrors = [];
         $this->totalCount = 0;
@@ -69,11 +70,13 @@ class DefaultCsvImportUseCase extends BaseCsvImportUseCase
             $depoList = $this->depoListUsecase->findDepoListAll();
 
             DB::beginTransaction();
-            $parseErrors = $this->importFile($fileName, function ($rows, $lineNo) use ($depoList) {
+            $parseErrors = $this->importFile($fileName, function ($rows, $lineNo) use ($depoList, $displayType) {
                 // データ行
                 $this->totalCount++;
                 // baseカラム数
                 $baseColumns = $this->getImportColumns('lead_time');
+                // 文字列から数値へ変換
+                $displayType = intval($displayType);
 
                 // カラム数チェック
                 if (count($rows) == $baseColumns) {
@@ -92,6 +95,28 @@ class DefaultCsvImportUseCase extends BaseCsvImportUseCase
                         $nextDayTimeDeadline = $rows[10];
                         $todayTimeDeadline1 = $rows[11];
                         $todayTimeDeadline2 = $rows[12];
+                        // ディスプレイタイプでの値検査
+                        if ($displayType === AppConst::DEPO_DISPLAY_CLS_SURP) {
+                            // サプライズデポ
+                            if (
+                                // 翌日時間指定もしくは翌日締切時間の入力があった場合
+                                intval($nextDayTimeType) > 0 ||
+                                intval($nextDayTimeDeadline) > 0
+                            ) {
+                                $errors[] = Lang::get('error.C_L21.leadtime.save_surprise');
+                            }
+
+                        } else if ($displayType === AppConst::DEPO_DISPLAY_CLS_ENTERME) {
+                            // エンタメデポ
+                            if (
+                                // 当日配送締切時間の入力があった場合
+                                intval($todayTimeDeadline1) > 0 ||
+                                intval($todayTimeDeadline2) > 0 ||
+                                $isAreaTodayDeliveryFlg === true
+                            ) {
+                                $errors[] = Lang::get('error.C_L21.leadtime.save_entertainment');
+                            }
+                        }
                         // 住所情報のvalidationチェック
                         $validatorAddress = Validator::make(
                             [

@@ -35,13 +35,17 @@ class EloquentDepoCalInfoTmpRepository implements DepoCalInfoTmpRepositoryInterf
      */
     public function deleteDepoCalInfoTmp($depocd, $deliveryDate,int $userId)
     {
-        $result = $this->eloquent::where('depo_cd', $depocd)
-        ->where('delivery_date', '>=', $deliveryDate)
-        ->update(
+        $query = $this->eloquent::where('depo_cd', $depocd)
+                                ->where('delivery_date', '>=', $deliveryDate);
+
+        // ロックが取得できない場合はエラーにする
+        $query->lock('for update nowait')->get();
+
+        $result = $query->update(
             [
-            'deleted_id' => $userId,
-            'deleted_at' => now()
-        ]
+                'deleted_id' => $userId,
+                'deleted_at' => now()
+            ]
         );
 
         return $result;
@@ -171,11 +175,13 @@ class EloquentDepoCalInfoTmpRepository implements DepoCalInfoTmpRepositoryInterf
     public function deleteDepoCalTmpUnnecessary(array $unnecessaryDepoList)
     {
         foreach ($unnecessaryDepoList as $value) {
-            $result = $this->eloquent::whereNull('deleted_at')
-            ->where('depo_cd', $value)
-            ->delete();
+            $query = $this->eloquent::withTrashed() // 論理削除済みデータも対象
+                            ->where('depo_cd', $value);
 
-            return $result;
+            // ロックが取得できない場合はエラーにする
+            $query->lock('for update nowait')->get();
+
+            $query->forceDelete();
         }
     }
     
@@ -227,16 +233,21 @@ class EloquentDepoCalInfoTmpRepository implements DepoCalInfoTmpRepositoryInterf
     }
 
     /**
-     * 【C_LB_03】CreanUPバッチ
+     * 【C_LB_03】CleanUPバッチ
      * デポカレンダ－情報-tmp論理削除
+     * @param string $criterionDate 削除基準年月日
+     * @param string $userId
      * @return void
      */
-    public function deleteDepoCalInfoTmpCreanUp($criterionDate, $userId)
+    public function deleteDepoCalInfoTmpCleanUp($criterionDate, $userId)
     {
         $query = $this->eloquent::query();
-        $query->where('delivery_date', '<', $criterionDate)
-        ->whereNull('deleted_at')
-        ->update(
+        $query->where('delivery_date', '<', $criterionDate);
+
+        // ロックが取得できない場合はエラーにする
+        $query->lock('for update nowait')->get();
+
+        $query->update(
             [
                 'deleted_id' => $userId,
                 'deleted_at' => now()

@@ -11,12 +11,14 @@ Route::group(['middleware' => ['api']], function () {
 
     // デフォルト設定画面（カレンダーデフォルト情報）
     Route::get('/C_L10/search', 'CalendarConfirmApiController@search');
+    Route::get('/C_L10/count', 'CalendarConfirmApiController@count');
     Route::post('/C_L10/download', 'CalendarConfirmApiController@download');
     Route::post('/C_L10/approval', 'CalendarConfirmApiController@approval');
 
     // デフォルト一覧画面
     Route::post('/C_L20/download', 'DefaultListApiController@download');
     Route::get('/C_L20/search', 'DefaultListApiController@search');
+    Route::get('/C_L20/count', 'DefaultListApiController@count');
 
     // デフォルト設定画面（カレンダーデフォルト情報）
     Route::get('/C_L21/calendar/search', 'DefaultCalendarApiController@search');
@@ -51,6 +53,7 @@ Route::group(['middleware' => ['api']], function () {
     // イレギュラー一覧画面
     Route::get('/C_L30/search', 'IrregularListApiController@search');
     Route::post('/C_L30/download', 'IrregularListApiController@download');
+    Route::get('/C_L30/count', 'IrregularListApiController@count');
 
     // 地域選択子画面
     Route::get('/C_L55/addressList', 'AreaSelectApiController@index');

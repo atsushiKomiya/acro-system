@@ -245,9 +245,32 @@ export default {
         this.$root.$refs.appProgress.busy(false);
       });
     },
+    count: async function(e) {
+      this.$root.$refs.appProgress.busy(true);
+      await Repository.countCalendarConfirm(
+        this.mSearchParam.searchYm,
+        this.mSearchParam.searchPrefCd,
+        this.mSearchParam.searchIsNotApproval,
+        this.mSearchParam.searchIsNotConfirm,
+        this.mSearchParam.searchDisplayType
+      ).then(response => {
+        var result = response.data;
+        if (result.isSuccess) {
+          this.mCalendarListCount = result.data;
+        } else {
+          alert(result.message);
+        }
+      }).catch(error => {
+        var data = error.response.data;
+        alert(data.message)
+      }).finally(() => {
+        this.$root.$refs.appProgress.busy(false);
+      });
+    },
     /** ダウンロード前準備 */
-    downloadSetup: function(e) {
-      if(this.mCalendarList == 0) {
+    downloadSetup: async function(e) {
+      await this.count();
+      if(this.mCalendarListCount == 0) {
         alert('検索結果が0件のため、ダウンロードできません。');
         return false;
       }

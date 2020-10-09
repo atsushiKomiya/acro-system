@@ -48,4 +48,16 @@ class IrregularListUseCase
         $returnTransCondition = '%('.str_replace(',', '|', $transCondition).')%';
         return $returnTransCondition;
     }
+
+    /**
+     * @return void
+     */
+    public function countIrregularList(IrregularListSearchEntity $condition)
+    {
+        $irregularListModel = null;
+        // 件数取得処理
+        $irregularListModel = $this->iIrregularRepository->countIrregularList($condition);
+
+        return $irregularListModel;
+    }
 }

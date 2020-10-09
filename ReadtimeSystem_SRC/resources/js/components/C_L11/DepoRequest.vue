@@ -99,19 +99,29 @@
                           <td colspan="2" class="t-depo align-middle text-center" :class="{ 'bg-holiday' : holidayCheck(mDisplayDepoCalInfo.calendarList,weekObj.ymd) }" :key="weekObj.ymd">{{weekObj.day}}日</td>
                         </tr>
                         <tr class="calendar-row">
-                          <td class="t-cal-child-td" v-if="depoDivisionCheckSpr(depoInfo.displayType) && calendarPulldownDispCheck(mDisplayDepoCalInfo.calendarList,weekObj.ymd)">
+                          <!-- 変更可能な場合の表示 -->
+                          <td class="t-cal-child-td" v-if="!weekObj.readOnly && depoDivisionCheckSpr(depoInfo.displayType) && calendarPulldownDispCheck(mDisplayDepoCalInfo.calendarList,weekObj.ymd)">
                             <select class="form-control" :value="selectJudgeDeadlineFlg(mDisplayDepoCalInfo.calendarList, weekObj.ymd, true)" @change="changeBeforeDeadlineFlg($event, mDisplayDepoCalInfo.calendarList, weekObj.ymd, true)" :class="{ 'font-change' : mDisplayDepoCalInfo.calendarList[weekObj.ymd].isChangeBefore }">
                               <option :value="true">○</option>
                               <option :value="false">×</option>
                               <option v-for="(deliverydeadline,key) in deliveryDeadlineList" :key="key" :value="key">{{deliverydeadline}}</option>
                             </select>
                           </td>
-                          <td class="t-cal-child-td" v-if="depoDivisionCheckEnt(depoInfo.displayType) && calendarPulldownDispCheck(mDisplayDepoCalInfo.calendarList,weekObj.ymd)">
-                            <select class="form-control" :value="selectJudgeDeadlineFlg(mDisplayDepoCalInfo.calendarList, weekObj.ymd, false)" @change="changeBeforeDeadlineFlg($event, mDisplayDepoCalInfo.calendarList, weekObj.ymd, false)" :class="{ 'font-change' : mDisplayDepoCalInfo.calendarList[weekObj.ymd].isChangeToday }">
+                          <td class="t-cal-child-td" v-if="!weekObj.readOnly && depoDivisionCheckEnt(depoInfo.displayType) && calendarPulldownDispCheck(mDisplayDepoCalInfo.calendarList,weekObj.ymd)">
+                            <select v-bind:readonly="weekObj.readOnly" class="form-control" :value="selectJudgeDeadlineFlg(mDisplayDepoCalInfo.calendarList, weekObj.ymd, false)" @change="changeBeforeDeadlineFlg($event, mDisplayDepoCalInfo.calendarList, weekObj.ymd, false)" :class="{ 'font-change' : mDisplayDepoCalInfo.calendarList[weekObj.ymd].isChangeToday }">
                               <option :value="true">○</option>
                               <option :value="false">×</option>
                               <option v-for="(deliverydeadline,key) in deliveryDeadlineList" :key="key" :value="key">{{deliverydeadline}}</option>
                             </select>
+                          </td>
+                          <!-- 変更不可の場合の表示 -->
+                          <td class="t-cal-child-td font-unchangeable"
+                              v-if="weekObj.readOnly && depoDivisionCheckSpr(depoInfo.displayType) && calendarPulldownDispCheck(mDisplayDepoCalInfo.calendarList,weekObj.ymd)">
+                                {{selectJudgeDeadlineFlgReadOnlyValue(mDisplayDepoCalInfo.calendarList, weekObj.ymd, true)}}
+                          </td>
+                          <td class="t-cal-child-td font-unchangeable"
+                              v-if="weekObj.readOnly && depoDivisionCheckEnt(depoInfo.displayType) && calendarPulldownDispCheck(mDisplayDepoCalInfo.calendarList,weekObj.ymd)">
+                                {{selectJudgeDeadlineFlgReadOnlyValue(mDisplayDepoCalInfo.calendarList, weekObj.ymd, false)}}
                           </td>
                         </tr>
                       </template>
@@ -193,7 +203,8 @@ export default {
     approvalstatus: String,
     confirmstatus: String,
     displayDateStr: String,
-    listBackUrl: String
+    listBackUrl: String,
+    depoUnchangeableDays: String,
   },
   data: function () {
     return {
@@ -419,6 +430,18 @@ export default {
       }
       return value;
     },
+    /** 前日締切/当日配送プルダウン変更不可時の表示内容 */
+    selectJudgeDeadlineFlgReadOnlyValue: function(displayDepoCalInfo,ymd,isBefore){
+      // selectJudgeDeadlineFlg()がtrue/falseの場合に○×に変換するだけ
+      var selectValue = this.selectJudgeDeadlineFlg(displayDepoCalInfo, ymd, isBefore);
+      if(selectValue === "true"){
+        return "○";
+      }else if(selectValue === "false"){
+        return "×"
+      }else{
+        return selectValue;
+      }
+    },
     /** 前日締切/当日配送プルダウン表示内容反映 */
     changeBeforeDeadlineFlg: function(event,depoCalInfo,ymd,isBefore){
       var flgKeyName = isBefore ? 'beforeDeadlineFlg' : 'todayDeliveryFlg';
@@ -482,6 +505,9 @@ export default {
       var lastDay = 0;
       var dispDayList = Array();
       var weekCount = 5;
+      // デポの場合に変更可能な最小の日付
+      var minChangeableDate = moment().add(Number(this.depoUnchangeableDays), 'days');
+
       if (this.mTargetYm) {
         //moment 日付関係のスクリプト
         var momentDate = moment(this.mTargetYm, "YYYYMM");
@@ -510,12 +536,17 @@ export default {
             baseDay += 1;
           }
 
+          // 変更の可/不可判定
+          var readOnly = this.authInfo.AUTH_CLS == 2 // デポの場合、
+                            ? moment(ymd, "YYYYMMDD").isBefore(minChangeableDate, 'day') // 変更可能な日付より前は変更不可
+                            : false; // デポ以外は制限なし
           var obj = {
             isDisp: isDisp,
             row: i,
             weekNo: j,
             ymd: ymd,
             day: Number(day),
+            readOnly: readOnly,
           }
           weekList.push(obj);
         }

@@ -55,9 +55,9 @@ class DepoCalAprInfoUseCase
      *
      * @return integer
      */
-    public function deleteDepoCalAprInfo($depocd, $startDate)
+    public function deleteDepoCalAprInfo($depocd, $startDate, $userId)
     {
-        $depo = $this->iDepoCalAprInfoRepository->deleteDepoCalAprInfo($depocd, $startDate);
+        $depo = $this->iDepoCalAprInfoRepository->deleteDepoCalAprInfo($depocd, $startDate, $userId);
 
         return $depo;
     }
@@ -116,6 +116,25 @@ class DepoCalAprInfoUseCase
         $ymdList = AppUtility::getTargetYmdList($ym);
 
         $result = $this->iDepoCalAprInfoRepository->findDepoCalendarList($ym, $pref, $isNotApproval, $isNotConfirm, $displayType, $ymdList);
+
+        return $result;
+    }
+
+    /**
+     * デポ稼働日確認リストの件数を取得する
+     *
+     * @param string $ym
+     * @param integer $pref
+     * @param boolean $isNotApproval
+     * @param boolean $isNotConfirm
+     * @param integer $displayType
+     * @return void
+     */
+    public function countDepoCalendarList(string $ym, ?int $pref, bool $isNotApproval, bool $isNotConfirm, int $displayType)
+    {
+        $ymdList = AppUtility::getTargetYmdList($ym);
+
+        $result = $this->iDepoCalAprInfoRepository->countDepoCalendarList($ym, $pref, $isNotApproval, $isNotConfirm, $displayType, $ymdList);
 
         return $result;
     }
@@ -264,13 +283,13 @@ class DepoCalAprInfoUseCase
     }
 
     /**
-     * 【C_LB_03】CreanUPバッチ
+     * 【C_LB_03】CleanUPバッチ
      * デポカレンダ－承認情報論理削除
      * @return void
      */
-    public function deleteDepoCalAprInfoCreanUp($criterionDate, $userId)
+    public function deleteDepoCalAprInfoCleanUp($criterionDate, $userId)
     {
-        $data = $this->iDepoCalAprInfoRepository->deleteDepoCalAprInfoCreanUp($criterionDate, $userId);
+        $data = $this->iDepoCalAprInfoRepository->deleteDepoCalAprInfoCleanUp($criterionDate, $userId);
 
         return $data;
     }

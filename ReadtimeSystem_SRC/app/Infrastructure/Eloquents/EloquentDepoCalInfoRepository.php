@@ -34,9 +34,13 @@ class EloquentDepoCalInfoRepository implements DepoCalInfoRepositoryInterface
      */
     public function deleteDepoCalInfo(int $depocd, int $startDate)
     {
-        $result = $this->eloquent::where('depo_cd', '=', $depocd)
-        ->where('delivery_date', '>=', $startDate)
-        ->forceDelete();
+        $query = $this->eloquent::where('depo_cd', '=', $depocd)
+                                ->where('delivery_date', '>=', $startDate);
+
+        // ロックが取得できない場合はエラーにする
+        $query->lock('for update nowait')->get();
+
+        $result = $query->forceDelete();
         return $result;
     }
 
@@ -385,24 +389,35 @@ class EloquentDepoCalInfoRepository implements DepoCalInfoRepositoryInterface
      * デポカレンダー情報不要データ削除
      *
      * @param array $unnecessaryDepoList
-     * @return array
+     * @return void
      */
     public function deleteDepoCalUnnecessary($unnecessaryDepoList)
     {
         foreach ($unnecessaryDepoList as $value) {
-            $query = $this->eloquent::query();
-            $query->where('depo_cd', $value)->forcedelete();
+            $query = $this->eloquent::withTrashed() // 論理削除済みデータも対象
+                            ->where('depo_cd', $value);
+
+            // ロックが取得できない場合はエラーにする
+            $query->lock('for update nowait')->get();
+
+            $query->forceDelete();
         }
     }
 
     /**
-     * 【C_LB_03】CreanUPバッチ
+     * 【C_LB_03】CleanUPバッチ
      * デポカレンダ－情報削除
+     * @param string $criterionDate 削除基準年月日
      * @return void
      */
-    public function deleteDepoCalInfoCreanUp($criterionDate)
+    public function deleteDepoCalInfoCleanUp($criterionDate)
     {
         $query = $this->eloquent::query();
-        $query->where('delivery_date', '<', $criterionDate)->forcedelete();
+        $query->where('delivery_date', '<', $criterionDate);
+
+        // ロックが取得できない場合はエラーにする
+        $query->lock('for update nowait')->get();
+
+        $query->forcedelete();
     }
 }

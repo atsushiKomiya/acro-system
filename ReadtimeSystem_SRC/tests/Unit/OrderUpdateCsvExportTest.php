@@ -29,21 +29,37 @@ class OrderUpdateCsvExportTest extends TestCase
             ]
         ];
 
-        $itemCdList = [
-            '2222',
-            '4444',
+        $itemList = [
+            [
+                'itemCategoryLargeCd' => 10,
+                'itemCategoryMediumCd' => 1010,
+                'itemCd' => '2222',
+            ],
+            [
+                'itemCategoryLargeCd' => 10,
+                'itemCategoryMediumCd' => 1010,
+                'itemCd' => '4444',
+            ],
         ];
 
         $from = '20200701';
         $to = '20200731';
 
+        $dayofweekList = [
+            [
+                'dayofweek' => 0,
+                'publicHolidayStatus' => 2
+            ],
+        ];
+
         // 実行
         $usecase->chgDepoInfoCsv(
             $depoCdList,
             $addressList,
-            $itemCdList,
+            $itemList,
             $from,
             $to,
+            $dayofweekList,
         );
     }
 }

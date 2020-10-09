@@ -49,6 +49,8 @@ class IrregularListApiController extends ApiController
         $searchParam->searchDeponame = $request->searchDeponame;
         $searchParam->searchTransDeponame = $request->searchTransDeponame;
         $searchParam->searchTransDepocd = $request->searchTransDepocd;
+        $searchParam->searchChoiceDepoList = $request->searchChoiceDepoList;
+        $searchParam->searchChoiceTransDepoList = $request->searchChoiceTransDepoList;
         $searchParam->searchDisplayType = $request->searchDisplayType;
         $searchParam->searchItemCategoryLargecd = $request->searchItemCategoryLargecd;
         $searchParam->searchItemCategoryLargename = $request->searchItemCategoryLargename;
@@ -56,6 +58,7 @@ class IrregularListApiController extends ApiController
         $searchParam->searchItemCategoryMediumname = $request->searchItemCategoryMediumname;
         $searchParam->searchItemCd = $request->searchItemCd;
         $searchParam->searchItemName = $request->searchItemName;
+        $searchParam->searchItemList = $request->searchItemList;
         $searchParam->searchOrderType = $request->searchOrderType;
         $searchParam->searchOrderDate = $request->searchOrderDate;
         $searchParam->searchOrderPeriodStart = $request->searchOrderPeriodStart;
@@ -97,6 +100,79 @@ class IrregularListApiController extends ApiController
     }
 
     /**
+     * イレギュラー件数取得
+     *
+     * @param Request $request
+     * @param AddressUseCase $addressUseCase
+     * @param DepoUseCase $depoUsecase
+     * @param ItemCategoryLargeUseCase $itemCategoryLargeUseCase
+     * @param ItemCategoryMediumUseCase $itemCategoryMediumUseCase
+     * @param ItemUseCase $itemUseCase
+     * @param IrregularListUseCase $irregularListUseCase
+     * @return void
+     */
+    public function count(
+        IrregularListSearchRequest $request,
+        IrregularListUseCase $irregularListUseCase
+    ) {
+        // 検索パラメータ
+        $searchParam = new IrregularListSearchEntity();
+        $searchParam->searchIrregularConfig = $request->searchIrregularConfig;
+        $searchParam->searchTitle = $request->searchTitle;
+        $searchParam->searchDepocd = $request->searchDepocd;
+        $searchParam->searchDeponame = $request->searchDeponame;
+        $searchParam->searchTransDeponame = $request->searchTransDeponame;
+        $searchParam->searchTransDepocd = $request->searchTransDepocd;
+        $searchParam->searchChoiceDepoList = $request->searchChoiceDepoList;
+        $searchParam->searchChoiceTransDepoList = $request->searchChoiceTransDepoList;
+        $searchParam->searchDisplayType = $request->searchDisplayType;
+        $searchParam->searchItemCategoryLargecd = $request->searchItemCategoryLargecd;
+        $searchParam->searchItemCategoryLargename = $request->searchItemCategoryLargename;
+        $searchParam->searchItemCategoryMediumcd = $request->searchItemCategoryMediumcd;
+        $searchParam->searchItemCategoryMediumname = $request->searchItemCategoryMediumname;
+        $searchParam->searchItemCd = $request->searchItemCd;
+        $searchParam->searchItemName = $request->searchItemName;
+        $searchParam->searchItemList = $request->searchItemList;
+        $searchParam->searchOrderType = $request->searchOrderType;
+        $searchParam->searchOrderDate = $request->searchOrderDate;
+        $searchParam->searchOrderPeriodStart = $request->searchOrderPeriodStart;
+        $searchParam->searchOrderPeriodEnd = $request->searchOrderPeriodEnd;
+        $searchParam->searchOrderWeekList = $request->searchOrderWeekList;
+        $searchParam->searchOrderHolidayList = $request->searchOrderHolidayList;
+        $searchParam->searchZipcdList = $request->searchZipcdList;
+        $searchParam->searchPrefList = $request->searchPrefList;
+        $searchParam->searchPrefNameList = $request->searchPrefNameList;
+        $searchParam->searchSikuList = $request->searchSikuList;
+        $searchParam->searchTyouList = $request->searchTyouList;
+        $searchParam->searchCUseCd = $request->searchCUseCd;
+        $searchParam->searchIsValid = $request->searchIsValid;
+        $searchParam->searchDeliveryTime = $request->searchDeliveryTime;
+        $searchParam->searchDeliveryDateType = $request->searchDeliveryDateType;
+        $searchParam->searchDeliveryDate = $request->searchDeliveryDate;
+        $searchParam->searchDeliveryPeriodStart = $request->searchDeliveryPeriodStart;
+        $searchParam->searchDeliveryPeriodEnd = $request->searchDeliveryPeriodEnd;
+        $searchParam->searchDeliveryWeekList = $request->searchDeliveryWeekList;
+        $searchParam->searchDeliveryHolidayList = $request->searchDeliveryHolidayList;
+        $searchParam->searchIsBeforeDeadline = $request->searchIsBeforeDeadline;
+        $searchParam->searchIsTodayDelivery = $request->searchIsTodayDelivery;
+        $searchParam->searchIsTimeSelect = $request->searchIsTimeSelect;
+        $searchParam->searchIsPrivateHome = $request->searchIsPrivateHome;
+
+        $res = new BaseApiResponse();
+        try {
+            // イレギュラー件数
+            $count = $irregularListUseCase->countIrregularList($searchParam);
+            // 返却
+            $res->apiSuccessful();
+            $res->data = $count;
+        } catch (Exception $ex) {
+            Log::error($ex->getMessage());
+            $res->apiServerError(500, Lang::get('error.C_L30.search'));
+        }
+        return $res;
+    }
+
+    /**
      * CSVダウンロード
      *
      * @param IrregularListSearchRequest $request
@@ -120,6 +196,8 @@ class IrregularListApiController extends ApiController
             $searchParam->searchDeponame = $request->searchDeponame;
             $searchParam->searchTransDeponame = $request->searchTransDeponame;
             $searchParam->searchTransDepocd = $request->searchTransDepocd;
+            $searchParam->searchChoiceDepoList = $request->searchChoiceDepoList;
+            $searchParam->searchChoiceTransDepoList = $request->searchChoiceTransDepoList;
             $searchParam->searchDisplayType = $request->searchDisplayType;
             $searchParam->searchItemCategoryLargecd = $request->searchItemCategoryLargecd;
             $searchParam->searchItemCategoryLargename = $request->searchItemCategoryLargename;
@@ -127,6 +205,7 @@ class IrregularListApiController extends ApiController
             $searchParam->searchItemCategoryMediumname = $request->searchItemCategoryMediumname;
             $searchParam->searchItemCd = $request->searchItemCd;
             $searchParam->searchItemName = $request->searchItemName;
+            $searchParam->searchItemList = $request->searchItemList;
             $searchParam->searchOrderType = $request->searchOrderType;
             $searchParam->searchOrderDate = $request->searchOrderDate;
             $searchParam->searchOrderPeriodStart = $request->searchOrderPeriodStart;

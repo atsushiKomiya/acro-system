@@ -25,6 +25,9 @@ import 'quill/dist/quill.snow.css';
 import 'quill/dist/quill.bubble.css';
 Vue.use(VueQuillEditor);
 
+import CGrid from 'vue-cheetah-grid';
+Vue.use(CGrid);
+
 // Common Parts
 import Datepicker from 'vuejs-datepicker';
 import { ja } from "vuejs-datepicker/dist/locale";
@@ -34,6 +37,7 @@ Vue.component('appheader', require('./components/common/AppHeader.vue').default)
 Vue.component('apptoggletable', require('./components/common/AppToggleTable.vue').default);
 Vue.component('apptoggle', require('./components/common/AppToggle.vue').default);
 Vue.component('app-date-pulldown', require('./components/common/AppDatePulldown.vue').default);
+Vue.component('selectbox', require('./components/common/SelectBox.vue').default);
 
 // TOP
 Vue.component('logininfo', require('./components/C_L01/LoginInfo.vue').default);

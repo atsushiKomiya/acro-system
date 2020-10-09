@@ -94,7 +94,7 @@ class EloquentDepoAddressLeadtimeRepository implements DepoAddressLeadtimeReposi
         ->where('depo_address_leadtime.depo_cd', $depocd);
 
         // 都道府県がパラメータに存在する場合
-        if (!is_null($pref)) {
+        if ($pref !== 0 && !is_null($pref)) {
             $sql = $sql->where('depo_address_leadtime.pref_cd', $pref);
         }
         
@@ -353,12 +353,18 @@ class EloquentDepoAddressLeadtimeRepository implements DepoAddressLeadtimeReposi
      * デポ住所リードタイム情報不要データ削除
      *
      * @param array $unnecessaryDepoList
+     * @return void
      */
     public function deleteDepoAddressUnnecessary($unnecessaryDepoList)
     {
         foreach ($unnecessaryDepoList as $value) {
-            $query = $this->eloquent::query();
-            $query->where('depo_cd', $value)->delete();
+            $query = $this->eloquent::withTrashed() // 論理削除済みデータも対象
+                            ->where('depo_cd', $value);
+
+            // ロックが取得できない場合はエラーにする
+            $query->lock('for update nowait')->get();
+
+            $query->forceDelete();
         }
     }
 

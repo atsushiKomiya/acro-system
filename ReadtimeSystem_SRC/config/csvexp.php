@@ -59,6 +59,7 @@ return [
         ['祝後前日締切','holi_after_deadline_flg',AppConst::TYPE_STR],
         ['祝後当日配送','holi_after_today_delivery_flg',AppConst::TYPE_STR],
         ['個人宅可否','private_home_flg',AppConst::TYPE_STR],
+        ['手持ちお届け可','handing_flg',AppConst::TYPE_STR],
         ['慶弔区分','congratulation_kbn_flg',AppConst::TYPE_STR],
         ['振替先郵便デポ','transfer_post_depo_cd',AppConst::TYPE_STR],
         ['振替先郵便デポ名','deponame2',AppConst::TYPE_STR],
@@ -285,9 +286,13 @@ return [
         ['都道府県CD','prefCd',AppConst::NUM],
         ['市区郡','siku',AppConst::TYPE_STR],
         ['町名','tyou',AppConst::TYPE_STR],
+        ['商品カテゴリ大CD','itemCategoryLargeCd',AppConst::NUM],
+        ['商品カテゴリ中CD','itemCategoryMediumCd',AppConst::NUM],
         ['商品CD','itemCd',AppConst::NUM],
         ['期間FROM','ymdFrom',AppConst::TYPE_STR],
         ['期間TO','ymdTo',AppConst::TYPE_STR],
+        ['曜日','dayofweek',AppConst::NUM],
+        ['祝日','publicHolidayStatus',AppConst::NUM],
     ],
 
 ];

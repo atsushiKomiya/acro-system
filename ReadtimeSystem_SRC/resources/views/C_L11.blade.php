@@ -22,6 +22,7 @@
   :display-date-str='@json($displayDateStr)'
   :error-msg-list='@json($errorMsgList)'
   :list-back-url='@json($listBackUrl)'
+  :depo-unchangeable-days='@json($depoUnchangeableDays)'
   ></depo-request>
 @endsection
  

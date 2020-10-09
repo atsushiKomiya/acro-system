@@ -1,5 +1,8 @@
 <template>
-  <div v-bind:class="{ 'toggle-td': isClass }" @click="change">
+  <div
+    v-bind:class="{ 'toggle-td': isClass }"
+    @click="change"
+  >
     <template v-if="isActiveComputed"><span>○</span></template>
     <template v-else><span>×</span></template>
   </div>
@@ -7,6 +10,7 @@
 <script>
   export default {
     props: {
+      model: Object,
       isClass: Boolean,
       isActive: Boolean,
     },
@@ -22,6 +26,7 @@
         },
         set: function(newValue) {
           this.$emit("update:isActive", newValue);
+          this.$emit('change', this.model);
         }
       },
     }

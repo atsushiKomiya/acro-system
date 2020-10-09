@@ -14,12 +14,20 @@ class ChgDepoInfoEntity extends BaseEntity
     private $siku;
     // 町名
     private $tyou;
+    // 商品カテゴリ大CD
+    private $itemCategoryLargeCd;
+    // 商品カテゴリ中CD
+    private $itemCategoryMediumCd;
     // 商品CD
     private $itemCd;
     // 期間FROM
     private $ymdFrom;
     // 期間TO
     private $ymdTo;
+    // 曜日
+    private $dayofweek;
+    // 祝日ステータス
+    private $publicHolidayStatus;
 
     /**
      * Getter.

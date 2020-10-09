@@ -76,8 +76,8 @@ class LeadTimeServerApiUseCase extends LeadTimeApiUseCase
             ) {
                 if (
                     empty($data->delivery_date_type)
-                    || ($data->delivery_date_type == AppConst::DELIVERY_DATE_TYPE['DAY'] && $data->delivery_date == $this->request->input('aDate'))
-                    || ($data->delivery_date_type == AppConst::DELIVERY_DATE_TYPE['PERIOD'] && $data->delivery_date_from <= $this->request->input('aDate') && $data->delivery_date_to >= $this->request->input('aDate'))
+                    || ($data->delivery_date_type == AppConst::DELIVERY_DATE_TYPE['DAY'] && $data->delivery_date == date('Y-m-d', strtotime($this->request->input('aDate'))))
+                    || ($data->delivery_date_type == AppConst::DELIVERY_DATE_TYPE['PERIOD'] && $data->delivery_date_from <= date('Y-m-d', strtotime($this->request->input('aDate'))) && $data->delivery_date_to >= date('Y-m-d', strtotime($this->request->input('aDate'))))
                     || ($data->delivery_date_type == AppConst::DELIVERY_DATE_TYPE['WEEK'] && $data->date_type == AppConst::DATE_TYPE['DELIVERY_DATE'] && isset($this->delivery_date_week[$this->api_date['Ymd']]) && $data->public_holiday_status == $this->delivery_date_week[$this->api_date['Ymd']]->public_holiday_status)
                 ) {
                     $trans_depo_cd = $data->trans_depo_cd;
@@ -210,7 +210,7 @@ class LeadTimeServerApiUseCase extends LeadTimeApiUseCase
                 $res_time_select,
                 $res_is_personal_delivery_flg,
                 $res_is_today_deadline_undeliv_flg
-            ) = $this->irNotOrderCheck($datas->depo_cd, $this->request->input('aDate'));
+            ) = $this->irNotOrderCheck($datas->depo_cd, date('Y-m-d', strtotime($this->request->input('aDate'))));
 
             // 受注不可エラーフラグが不可の場合次へ
             if ($res_flg === true) {
@@ -249,7 +249,7 @@ class LeadTimeServerApiUseCase extends LeadTimeApiUseCase
                 $res_is_today_deadline_undeliv_flg,
                 $res_is_time_select_undeliv_flg,
                 $res_is_personal_delivery_flg
-            ) = $this->irNotDeliveryCheck($datas->depo_cd, $this->request->input('aDate'));
+            ) = $this->irNotDeliveryCheck($datas->depo_cd, date('Y-m-d', strtotime($this->request->input('aDate'))));
 
             // 配送不可フラグが不可の場合次へ
             if ($res_flg === true) {
@@ -675,7 +675,7 @@ class LeadTimeServerApiUseCase extends LeadTimeApiUseCase
                 $res_time_select,
                 $res_is_personal_delivery_flg,
                 $res_is_today_deadline_undeliv_flg
-            ) = $this->irNotOrderCheck($datas->depo_cd, $this->request->input('aDate'));
+            ) = $this->irNotOrderCheck($datas->depo_cd, date('Y-m-d', strtotime($this->request->input('aDate'))));
             // 受注不可エラーフラグがTRUEの場合
             if ($res_flg === true) {
                 // 当日配送不可フラグ = true:不可 の場合
@@ -720,7 +720,7 @@ class LeadTimeServerApiUseCase extends LeadTimeApiUseCase
                 $res_is_today_deadline_undeliv_flg,
                 $res_is_time_select_undeliv_flg,
                 $res_is_personal_delivery_flg
-            ) = $this->irNotDeliveryCheck($datas->depo_cd, $this->request->input('aDate'));
+            ) = $this->irNotDeliveryCheck($datas->depo_cd, date('Y-m-d', strtotime($this->request->input('aDate'))));
             // 配送不可エラーフラグがtrue の場合
 
             if ($res_flg === true) {
@@ -827,14 +827,14 @@ class LeadTimeServerApiUseCase extends LeadTimeApiUseCase
                             $this->use_depo_list[$key]->short_work_date = $data->delivery_date;
                             // 最短可能作業日に有効デポ情報のデポリードタイムを足した日付を最短届日として有効デポ情報に設定
                             $leadtime = $this->use_depo_list[$key]->depo_lead_time;
-                            $this->use_depo_list[$key]->short_delivery_date = date('Y-m-d', strtotime("+{$leadtime} day", strtotime($this->use_depo_list[$key]->short_work_date)));
+                            $this->use_depo_list[$key]->short_delivery_date = date('Y/m/d', strtotime("+{$leadtime} day", strtotime($this->use_depo_list[$key]->short_work_date)));
                             break;
                         case AppConst::BEFORE_DEADLINE_FLG['TIME']:
                             // 取得した日付を最短可能作業日として有効デポ情報に設定
                             $this->use_depo_list[$key]->short_work_date = $data->delivery_date;
                             // 最短可能作業日に有効デポ情報のデポリードタイムを足した日付を最短届日として有効デポ情報に設定
                             $leadtime = $this->use_depo_list[$key]->depo_lead_time;
-                            $this->use_depo_list[$key]->short_delivery_date = date('Y-m-d', strtotime("+{$leadtime} day", strtotime($this->use_depo_list[$key]->short_work_date)));
+                            $this->use_depo_list[$key]->short_delivery_date = date('Y/m/d', strtotime("+{$leadtime} day", strtotime($this->use_depo_list[$key]->short_work_date)));
                             // 取得した”前日締切締め時間”で有効デポ情報の”翌日配送締切時間を上書
                             $this->use_depo_list[$key]->next_day_time_deadline = $data->before_deadline_limit_time;
                             break;
@@ -858,7 +858,7 @@ class LeadTimeServerApiUseCase extends LeadTimeApiUseCase
 
         // 最短届日 > リクエストパラメーター_お届け希望日”のデータは破棄
         foreach ($this->use_depo_list as $key => $datas) {
-            if ($this->request->input('procKbn') == AppConst::PROCKBN['ORDER_CHECK'] && $datas->short_delivery_date > $this->request->input('aDate')) {
+            if ($this->request->input('procKbn') == AppConst::PROCKBN['ORDER_CHECK'] && $datas->short_delivery_date > date('Y/m/d', strtotime($this->request->input('aDate')))) {
                 unset($this->use_depo_list[$key]);
             }
         }
@@ -875,7 +875,7 @@ class LeadTimeServerApiUseCase extends LeadTimeApiUseCase
                 $res_time_select,
                 $res_is_personal_delivery_flg,
                 $res_is_today_deadline_undeliv_flg
-            ) = $this->irNotOrderCheck($datas->depo_cd, $this->request->input('aDate'));
+            ) = $this->irNotOrderCheck($datas->depo_cd, date('Y-m-d', strtotime($this->request->input('aDate'))));
             // 受注不可エラーフラグがTRUEの場合
             if ($res_flg === true) {
                 // 時間指定
@@ -917,7 +917,7 @@ class LeadTimeServerApiUseCase extends LeadTimeApiUseCase
                 $res_is_today_deadline_undeliv_flg,
                 $res_is_time_select_undeliv_flg,
                 $res_is_personal_delivery_flg
-            ) = $this->irNotDeliveryCheck($datas->depo_cd, $this->request->input('aDate'));
+            ) = $this->irNotDeliveryCheck($datas->depo_cd, date('Y-m-d', strtotime($this->request->input('aDate'))));
             // 配送不可エラーフラグがtrue かつ、変数：確定エンタメデポが空の場合
             if ($res_flg === true && count($comp_etm_depo) == 0) {
                 // 前日締切不可フラグが不可の場合

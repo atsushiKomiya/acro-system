@@ -7,9 +7,10 @@ const uploadDepoAddress = '/C_L21/depoaddress/upload';
 
 
 export default {
-    uploadApi(url,file) {
+    uploadApi(url,file,param) {
         let formData = new FormData();
         formData.append('uploadFile', file);
+        formData.append('param', param);
         return Client.post(url, formData);
     },
     uploadLeadtimeUrl() {

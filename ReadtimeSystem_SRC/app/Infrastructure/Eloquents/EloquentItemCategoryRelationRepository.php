@@ -47,6 +47,8 @@ class EloquentItemCategoryRelationRepository implements ItemCategoryRelationRepo
         ->join('item_category_medium', 'item_category_medium.category_medium_cd', '=', 'item_category_relation.category_medium_cd')
         ->join('view_item', 'view_item.item_cd', '=', 'item_category_relation.item_cd')
         ->where('view_item.sale_status', '=', AppConst::SALE_STATUS_ON)
+        ->orderBy('item_category_relation.category_large_cd')
+        ->orderBy('item_category_relation.category_medium_cd')
         ->orderBy('item_category_relation.item_category_relation_id')
         ->distinct()
         ->get()

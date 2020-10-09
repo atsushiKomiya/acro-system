@@ -46,10 +46,11 @@ class EloquentIrregularItemRepository implements IrregularItemRepositoryInterfac
             'item_category_medium.category_medium_name AS item_category_medium_name',
             'view_item.item_name AS item_name'
         )
-    ->join('item_category_large', 'item_category_large.category_large_cd', '=', 'irregular_item.lcat_cd')
-    ->join('item_category_medium', 'item_category_medium.category_medium_cd', '=', 'irregular_item.mcat_cd')
-    ->join('view_item', 'view_item.item_cd', '=', 'irregular_item.item_cd')
+    ->leftjoin('item_category_large', 'item_category_large.category_large_cd', '=', 'irregular_item.lcat_cd')
+    ->leftjoin('item_category_medium', 'item_category_medium.category_medium_cd', '=', 'irregular_item.mcat_cd')
+    ->leftjoin('view_item', 'view_item.item_cd', '=', 'irregular_item.item_cd')
     ->where('irregular_id', $irregularId)
+    ->orderBy('irregular_item_id')
     ->get()
     ->map(function ($item) use ($irregularItemFactory) {
         return $irregularItemFactory->make($item);

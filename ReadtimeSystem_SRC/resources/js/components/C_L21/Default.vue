@@ -96,7 +96,7 @@
     <div class="row my-3">
       <div class="col-md-6">
         <div class="span4">
-          <a class="btn btn-primary" :href="$root.URL_CONST.C_L20" role="button">一覧</a>
+          <a class="btn btn-primary" href="javascript:" @click="moveDefaultList()" role="button">一覧</a>
         </div>
       </div>
     </div>
@@ -119,13 +119,14 @@ export default {
       mSearchParam: this.searchParam,
       tabActive: 1,
       depoDefaultId: null,
-      checkDepoInfo: this.depoInfo,
+      checkDepoInfo: this.depoInfo
     };
   },
   methods: {
     reset: function() {
       this.mSearchParam.searchDepocd = "";
       this.mSearchParam.searchDeponame = "";
+      this.mSearchParam.searchDisplayType = "";
       this.checkDepoInfo = null;
       this.depoDefaultId = null;
     },
@@ -156,6 +157,15 @@ export default {
     },
     changeDepoDefaultId: function(depoDefaultId) {
       this.depoDefaultId = depoDefaultId;
+    },
+    moveDefaultList: function () {
+      var moveUrl = ''
+      if (this.searchParam.searchDepocd) {
+        moveUrl = this.$root.URL_CONST.C_L20 + "?searchDepocd=" + this.searchParam.searchDepocd;
+      } else {
+        moveUrl = this.$root.URL_CONST.C_L20;
+      }
+      location.href = moveUrl;
     }
   }
 };

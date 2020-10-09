@@ -66,11 +66,13 @@ class LeadTimeApiUseCase
         $this->delivery_date_week[date('Ymd', strtotime($this->request->input('aDate')))] = [];
         $this->api_date = [
             'Y-m-d' => date('Y-m-d'),
-            'Ymd'   => date('Ymd')
+            'Ymd'   => date('Ymd'),
+            'Y/m/d' => date('Y/m/d')
         ];
         $this->api_date_nextday = [
             'Y-m-d' => date('Y-m-d', strtotime('+1 day', strtotime($this->api_date['Y-m-d']))),
-            'Ymd'   => date('Ymd', strtotime('+1 day', strtotime($this->api_date['Ymd'])))
+            'Ymd'   => date('Ymd', strtotime('+1 day', strtotime($this->api_date['Ymd']))),
+            'Y/m/d'   => date('Y/m/d', strtotime('+1 day', strtotime($this->api_date['Y/m/d'])))
         ];
         $this->api_time = date('Hi');
         $this->aDate = [
@@ -268,7 +270,7 @@ class LeadTimeApiUseCase
     {
         foreach ($datas as $key => $data) {
             if (
-                ($this->request->input('aDate') == $this->api_date_nextday['Y-m-d'] && $this->api_time > $data->next_day_time_deadline)
+                ($this->request->input('aDate') == $this->api_date_nextday['Ymd'] && $this->api_time > $data->next_day_time_deadline)
                 || (
                     preg_match('/^([01][0-9]|2[0-3]):([0-5][0-9])まで$/u', $data->next_day_time_type_str)
                     && preg_match('/^([01][0-9]|2[0-3]):([0-5][0-9])まで$/u', $this->request->input('aTime'), $match)
@@ -311,7 +313,7 @@ class LeadTimeApiUseCase
         $nextday_depo = [];
         foreach ($datas as $key => $data) {
             // ”API起動日+1日 =お届け希望日”かつ、”API起動時間 > 翌日配送締切時間”の場合
-            if ($this->request->input('aDate') == $this->api_date_nextday['Y-m-d'] && $this->api_time > $data->next_day_time_deadline) {
+            if ($this->request->input('aDate') == $this->api_date_nextday['Ymd'] && $this->api_time > $data->next_day_time_deadline) {
                 // 該当翌日デポ削除
                 unset($datas[$key]);
             }
@@ -481,9 +483,9 @@ class LeadTimeApiUseCase
                             $this->logger->info("##最短お届け日設定", ['file' => basename(__FILE__), 'line' => __LINE__, 'param' => $this->wk]);
                             // 最短お届け日設定
                             if ($this->wk['today_depo_cd'] != null && ($this->wk['today_time_deadline1'] > $this->api_time || $this->wk['today_time_deadline2'] > $this->api_time)) {
-                                $val = $this->api_date['Y-m-d'];
+                                $val = $this->api_date['Y/m/d'];
                             } elseif ($this->wk['next_day_depo_cd'] != null) {
-                                $val = $this->api_date_nextday['Y-m-d'];
+                                $val = $this->api_date_nextday['Y/m/d'];
                             } else {
                                 $val = null;
                             }

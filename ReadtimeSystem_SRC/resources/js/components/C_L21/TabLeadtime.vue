@@ -38,11 +38,11 @@
               <th class="th-aria">都道府県コード</th>
               <th class="th-aria">市区郡</th>
               <th class="th-aria">町名</th>
-              <th>翌日時間指定</th>
-              <th>エリア<br/>当日配送可否</th>
-              <th>翌日配送<br/>締切時間</th>
-              <th>当日配送<br/>締切時間１</th>
-              <th>当日配送<br/>締切時間２</th>
+              <th v-if="!checkSurpriseDepo(searchParam.searchDisplayType)">翌日時間指定</th>
+              <th v-if="!checkEntertainmentDepo(searchParam.searchDisplayType)">エリア<br/>当日配送可否</th>
+              <th v-if="!checkSurpriseDepo(searchParam.searchDisplayType)">翌日配送<br/>締切時間</th>
+              <th v-if="!checkEntertainmentDepo(searchParam.searchDisplayType)">当日配送<br/>締切時間１</th>
+              <th v-if="!checkEntertainmentDepo(searchParam.searchDisplayType)">当日配送<br/>締切時間２</th>
             </tr>
           </thead>
           <tbody>
@@ -52,60 +52,58 @@
               <td>{{ model.prefCd }}</td>
               <td>{{ model.siku }}</td>
               <td>{{ model.tyou }}</td>
-              <td style="padding:0">
-                <select
-                  class="form-control"
-                  v-model="model.nextDayTimeType"
+              <td style="padding:0"
+                v-if="!checkSurpriseDepo(searchParam.searchDisplayType)"
+              >
+                <selectbox
+                  v-bind:model="model"
+                  v-bind:className="`form-control`"
+                  v-bind:paramName="`nextDayTimeType`"
+                  v-bind:options="timeSelectList"
                   @change="rowDataChange(model)"
-                >
-                  <option v-for="(value, key) in timeSelectList" :key="key" :value="key">{{ value }}</option>
-                </select>
-              </td>
-              <td class="toggle-div">
-                <apptoggle
-                  v-bind:is-class="true"
-                  v-bind:is-active.sync="model.isAreaTodayDeliveryFlg"
-                  @click="rowDataChange(model)"
                 />
               </td>
-              <td style="padding:0">
-                <select
-                  class="form-control"
-                  v-model="model.nextDayTimeDeadline"
-                  @change="rowDataChange(model)"
-                >
-                  <option
-                    v-for="(value, key) in deadlineTimeList"
-                    :key="key"
-                    :value="key"
-                  >{{ value }}</option>
-                </select>
+              <td class="toggle-div" v-if="!checkEntertainmentDepo(searchParam.searchDisplayType)">
+                <apptoggle
+                  v-bind:isClass="true"
+                  v-bind:isActive="model.isAreaTodayDeliveryFlg"
+                  v-bind:model="model"
+                  @change="changeIsAreaTodayDeliveryFlg(model)"
+                />
               </td>
-              <td style="padding:0">
-                <select
-                  class="form-control"
-                  v-model="model.todayTimeDeadline1"
+              <td style="padding:0"
+                v-if="!checkSurpriseDepo(searchParam.searchDisplayType)"
+              >
+                <selectbox
+                  v-if="!checkSurpriseDepo(searchParam.searchDisplayType)"
+                  v-bind:model="model"
+                  v-bind:className="`form-control`"
+                  v-bind:paramName="`nextDayTimeDeadline`"
+                  v-bind:options="deadlineTimeList"
                   @change="rowDataChange(model)"
-                >
-                  <option
-                    v-for="(value, key) in deadlineTimeList"
-                    :key="key"
-                    :value="key"
-                  >{{ value }}</option>
-                </select>
+                />
               </td>
-              <td style="padding:0">
-                <select
-                  class="form-control"
-                  v-model="model.todayTimeDeadline2"
+              <td style="padding:0"
+                v-if="!checkEntertainmentDepo(searchParam.searchDisplayType)"
+              >
+                <selectbox
+                  v-bind:model="model"
+                  v-bind:className="`form-control`"
+                  v-bind:paramName="`todayTimeDeadline1`"
+                  v-bind:options="deadlineTimeList"
                   @change="rowDataChange(model)"
-                >
-                  <option
-                    v-for="(value, key) in deadlineTimeList"
-                    :key="key"
-                    :value="key"
-                  >{{ value }}</option>
-                </select>
+                />
+              </td>
+              <td style="padding:0"
+                v-if="!checkEntertainmentDepo(searchParam.searchDisplayType)"
+              >
+                <selectbox
+                  v-bind:model="model"
+                  v-bind:className="`form-control`"
+                  v-bind:paramName="`todayTimeDeadline2`"
+                  v-bind:options="deadlineTimeList"
+                  @change="rowDataChange(model)"
+                />
               </td>
             </tr>
           </tbody>
@@ -136,7 +134,7 @@
         </form>
       </div>
       <div class="col-md-3 btn-right">
-        <button type="button" @click="upload(uploadLeadtimeUrl,mUploadfile,uploadAfter)" v-bind:disabled="!mUploadfile" class="btn btn-primary">CSV取込</button>
+        <button type="button" @click="upload(uploadLeadtimeUrl,mUploadfile,uploadAfter,searchParam.searchDisplayType)" v-bind:disabled="!mUploadfile" class="btn btn-primary">CSV取込</button>
         <button type="button" @click="register" class="btn btn-primary">登録</button>
       </div>
     </div>
@@ -166,7 +164,7 @@ export default {
       mInputSiku: "",
       mTabLeadtimeList: [],
       mTabLeadtimeListCount: 0,
-      mChangeTabLeadtimeList: []
+      mChangeTabLeadtimeList: [],
     };
   },
   methods: {
@@ -198,9 +196,13 @@ export default {
         });
     },
     /** デポ住所リードタイムリスト検索 */
-    search: function() {
+    search: async function() {
       this.$root.$refs.appProgress.busy(true);
-      Repository.searchLeadtimeList(this.searchParam.searchDepocd, this.mSelectPref)
+      var selectPref = this.mSelectPref;
+      if(selectPref == '') {
+        selectPref = 0;
+      }
+      await Repository.searchLeadtimeList(this.searchParam.searchDepocd, selectPref)
         .then(response => {
           var result = response.data;
           if (result.isSuccess) {
@@ -229,13 +231,15 @@ export default {
       this.download(fileName,request,url);
     },
     /** upload後の処理 */
-    uploadAfter: function(response) {
+    uploadAfter: async function(response) {
       this.$emit('update:errorList', []);
       var result = response.data;
       if(result.isSuccess) {
+        await this.search();
         alert(result.message);
       } else {
         alert('アップロードが失敗しました');
+        this.$root.$refs.appProgress.busy(false);
         var errorList = result.message.split('<br>');
         this.$emit('update:errorList', errorList);
       }
@@ -244,7 +248,7 @@ export default {
     register: function(e) {
       if(confirm('リードタイム情報を登録します、よろしいですか？')) {
         this.$root.$refs.appProgress.busy(true);
-        Repository.saveLeadtime(this.searchParam.searchDepocd,this.filterChangeLeadtimeList)
+        Repository.saveLeadtime(this.searchParam.searchDepocd,this.filterChangeLeadtimeList,this.searchParam.searchDisplayType)
           .then(response => {
             if (response.data.isSuccess) {
               alert("登録に成功しました。");
@@ -261,16 +265,28 @@ export default {
     },
     /** 登録データ判定／変更 */
     rowDataChange: function(leadtime) {
-      var idx = this.mChangeTabLeadtimeList
-        .map(function(row) {
-          return row.depoAddressLeadtimeId;
-        })
-        .indexOf(leadtime.depoAddressLeadtimeId);
-      if (idx == -1) {
-        // 存在しない場合のみ追加
+      // var idx = this.mChangeTabLeadtimeList
+      const arr = []
+      this.mChangeTabLeadtimeList.reduce(function(m, a, i) {
+        arr.push(a.depoAddressLeadtimeId);
+        return arr;
+      }, {})
+      if (arr.indexOf(leadtime.depoAddressLeadtimeId) === -1) {
         this.mChangeTabLeadtimeList.push(leadtime);
       }
     },
+    /** エンタメデポかの判定 */
+    checkEntertainmentDepo: function(displayType) {
+      return displayType === 3 ? true : false;
+    },
+    /** サプライズデポかの判定 */
+    checkSurpriseDepo: function(displayType) {
+      return displayType === 2 ? true : false;
+    },
+    changeIsAreaTodayDeliveryFlg: function(model){
+      model.isAreaTodayDeliveryFlg = model.isAreaTodayDeliveryFlg ? false: true;
+      this.rowDataChange(model);
+    }
   },
   computed: {
     /**

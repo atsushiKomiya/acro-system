@@ -141,7 +141,7 @@ class LeadTimeFrontApiController extends ApiController
                         $usecase->nextDayDeliveryDepoAllocation();
                         $this->logger->info("#7．翌日配送デポ引き当て処理 END", ['file' => basename(__FILE__), 'line' => __LINE__]);
                     } else {
-                        if ($request->input('aDate') == date('Y-m-d')) {
+                        if ($request->input('aDate') == date('Ymd')) {
                             /**
                              * 6．当日配送デポ引き当て処理
                              */

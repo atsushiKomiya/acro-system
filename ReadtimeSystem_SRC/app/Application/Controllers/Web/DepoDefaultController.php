@@ -9,6 +9,7 @@ use App\Application\UseCases\AddressUseCase;
 use App\Application\UseCases\ItemCategoryLargeUseCase;
 use App\Application\UseCases\ItemCategoryMediumUseCase;
 use App\Application\UseCases\ItemUseCase;
+use App\Consts\AppConst;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Lang;
@@ -19,6 +20,12 @@ use Exception;
  */
 class DepoDefaultController extends WebController
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->middleware('check.auth');
+    }
+
     /**
      * 初期表示
      *
@@ -48,6 +55,7 @@ class DepoDefaultController extends WebController
         $searchParam = null;
         $searchDepocd = null;
         $searchDeponame = null;
+        $searchDisplayType = null;
         $depoInfo = null;
         // エラーメッセージ
         $errorMsgList = array();
@@ -64,6 +72,7 @@ class DepoDefaultController extends WebController
                 $depoInfo = $depoUsecase->findDepo($searchDepocd);
                 $searchDepocd = $depoInfo->depocd;
                 $searchDeponame = $depoInfo->deponame;
+                $searchDisplayType = $depoInfo->displayType;
             } catch (Exception $e) {
                 // 取得できなかった場合のメッセージ
                 $errorMsgList[] = Lang::get('error.C_L21.calendar.search');
@@ -74,6 +83,7 @@ class DepoDefaultController extends WebController
         $searchParam = [
             'searchDepocd' => $searchDepocd,
             'searchDeponame' => $searchDeponame,
+            'searchDisplayType' => $searchDisplayType,
         ];
 
         // 慶長区分可否リスト
@@ -135,6 +145,27 @@ class DepoDefaultController extends WebController
 
         // 締め時間リスト
         $deadlineTimeList = Config::get('delivery.deadline_time_list');
+
+        // SESSIONからユーザー情報取得
+        $authInfo = $request->session()->get('auth_info');
+
+        // 検索対象のデポコードを判定
+        if ($authInfo->AUTH_CLS == AppConst::AUTH_CLS['shain']) {
+            // 社員の場合はパラメータ
+            $searchDepocd = $request->searchDepocd;
+        } else {
+            // ログイン時のデポコード
+            $searchDepocd = $authInfo->DEPO_CD;
+        }
+        $searchParam = [
+            'searchDepocd' => $searchDepocd,
+        ];
+        // デポ区分取得
+        if (!is_null($searchDepocd)) {
+            $depoInfo = $depoUsecase->findDepo($searchDepocd);
+            $searchDeponame = $depoInfo->deponame;
+            $searchParam['searchDeponame'] = $searchDeponame;
+        }
 
         return view('C_L20', compact(
             'prefList',

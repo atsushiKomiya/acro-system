@@ -67,4 +67,17 @@ interface ViewAddressRepositoryInterface
      * @return LazyCollection
      */
     public function findDepoDefaultList($prefCd, $depoCd, $itemCategoryLargecd, $itemCategoryMediumcd ,$itemCd, $isConfig): LazyCollection;
+
+    /**
+     * デフォルト一覧件数取得
+     *
+     * @param [type] $prefCd
+     * @param [type] $depoCd
+     * @param [type] $itemCategoryLargecd
+     * @param [type] $itemCategoryMediumcd
+     * @param [type] $itemCd
+     * @param [type] $isConfig
+     * @return int
+     */
+    public function countDepoDefaultList($prefCd, $depoCd, $itemCategoryLargecd, $itemCategoryMediumcd ,$itemCd, $isConfig): int;
 }

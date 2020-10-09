@@ -1,6 +1,7 @@
 <?php
 namespace App\Application\Controllers\Web;
 
+use App\Application\Requests\DepoRequestRequest;
 use App\Application\UseCases\DepoCalInfoUseCase;
 use App\Application\UseCases\DepoCalAprInfoUseCase;
 use App\Application\UseCases\DepoCalInfoTmpUseCase;
@@ -36,7 +37,7 @@ class DepoRequestController extends WebController
 
     /**
      * 検索
-     * @param Request $request
+     * @param DepoRequestRequest $request
      * @param DepoCalInfoUseCase $depoCalInfoUsecase
      * @param DepoCalAprInfoUseCase $depoCalAprInfoUsecase
      * @param DepoCalInfoTmpUseCase $depoCalInfoTmpUsecase
@@ -45,7 +46,7 @@ class DepoRequestController extends WebController
      * @return void
      */
     public function search(
-        Request $request,
+        DepoRequestRequest $request,
         DepoCalInfoUseCase $depoCalInfoUsecase,
         DepoCalAprInfoUsecase $depoCalAprInfoUsecase,
         DepoCalInfoTmpUseCase $depoCalInfoTmpUsecase,
@@ -127,6 +128,9 @@ class DepoRequestController extends WebController
         //配送時間リスト取得
         $deliveryDeadlineList = collect(Config::get('delivery.deadline_time_list'));
 
+        //デポ休業変更不可日数
+        $depoUnchangeableDays = Config::get('depo.unchangeableDays');
+
         // カレンダー情報取得
         if (!is_null($searchDepocd) && !is_null($searchYm)) {
             // デポ休業等申請情報取得
@@ -137,7 +141,7 @@ class DepoRequestController extends WebController
                 $errorMsgList[] = Lang::get('error.C_L11.search');
             } else {
                 // 承認状態
-                if (empty($displayDepoCalInfoModel->approvalDate)) {
+                if (!$displayDepoCalInfoModel->approvalDate) {
                     $approvalStatus = AppConst::APPLYING;
                 } else {
                     $approvalStatus = AppConst::APPROVED;
@@ -169,6 +173,7 @@ class DepoRequestController extends WebController
             'displayDateStr',
             'errorMsgList',
             'listBackUrl',
+            'depoUnchangeableDays',
         ));
     }
 }

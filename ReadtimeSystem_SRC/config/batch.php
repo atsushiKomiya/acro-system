@@ -10,5 +10,5 @@ return [
     'readTimeCheckMonth' => "7",
 
     // クリーンアップバッチ削除基準月
-    'creanUpMonth' => "3",
+    'cleanUpMonth' => "3",
 ];

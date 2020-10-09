@@ -58,7 +58,8 @@ class EloquentDepoItemInfoRepository implements DepoItemInfoRepositoryInterface
             $join->on('view_depo.depocd', '=', 'depo_item_info.depo_cd');
         })
         ->where('depo_item_info.depo_cd', '=', $depocd)
-        ->orderBy('depo_cd');
+        ->orderBy('depo_cd')
+        ->orderBy('item_cd');
 
         return $model;
     }
@@ -179,13 +180,18 @@ class EloquentDepoItemInfoRepository implements DepoItemInfoRepositoryInterface
      * デポ取扱商品不要データ削除
      *
      * @param array $unnecessaryDepoList
-     * @return array
+     * @return void
      */
     public function deleteDepoItemUnnecessary($unnecessaryDepoList)
     {
         foreach ($unnecessaryDepoList as $value) {
-            $query = $this->eloquent::query();
-            $query->where('depo_cd', $value)->forceDelete();
+            $query = $this->eloquent::withTrashed() // 論理削除済みデータも対象
+                            ->where('depo_cd', $value);
+
+            // ロックが取得できない場合はエラーにする
+            $query->lock('for update nowait')->get();
+
+            $query->forceDelete();
         }
     }
 

@@ -168,8 +168,8 @@
                   <td class="align-middle"><input type="checkbox" :checked="item.isSelect"></td>
                   <td>{{ index + 1 }}</td>
                   <td>{{ '【'+item.itemCategoryLargeCd+'】'+item.itemCategoryLargeName }}</td>
-                  <td>{{ '【'+item.itemCategoryMediumCd+'】'+item.itemCategoryMediumName }}</td>
-                  <td>{{ '【'+item.itemCd+'】' + item.itemName }}</td>
+                  <td><span v-if="item.itemCategoryMediumCd">{{ '【'+item.itemCategoryMediumCd+'】'+item.itemCategoryMediumName }}</span></td>
+                  <td><span v-if="item.itemCd">{{ '【'+item.itemCd+'】' + item.itemName }}</span></td>
                 </tr>
               </tbody>
             </table>
@@ -386,6 +386,41 @@ export default {
       mAnnoDateValidate: true
     }
   },
+  mounted: function() {
+    // 編集、複製時
+    // 一部のデポ
+    if (this.mChoiceDepoList.length > 0) {
+      this.mChoiceDepoList.forEach(addDepo => {
+        // 追加
+        addDepo['mode'] = 'add';
+        this.mRegisterDepoList.push({ ...addDepo })
+      });
+    }
+    // 一部のアイテム
+    if (this.mChoiceItemList.length > 0) {
+      this.mChoiceItemList.forEach(addItem => {
+        // 追加
+        addItem['mode'] = 'add';
+        this.mRegisterItemList.push({ ...addItem });
+      });
+    }
+    // 一部の地域
+    if (this.mChoiceAreaList.length > 0) {
+      this.mChoiceAreaList.forEach(addArea => {
+        // 追加
+        addArea['mode'] = 'add';
+        this.mRegisterAreaList.push({ ...addArea });
+      });
+    }
+    // 赤文字注釈:From 通年設定対応 「---年」を選択させる
+    if (this.annoStartYear == String(this.$root.CONFIG.BASE_FROM_YESR)) {
+      this.annoStartYear = '';
+    }
+    // 赤文字注釈:To 通年設定対応 「---年」を選択させる
+    if (this.annoEndYear == String(this.$root.CONFIG.BASE_TO_YESR)) {
+      this.annoEndYear = '';
+    }
+  },
   methods:{
     /** デポ選択子画面表示 */
     depoSelectOpen:function(isList){
@@ -423,8 +458,9 @@ export default {
           addDepo['mode'] = 'add';
           this.mRegisterDepoList.push({ ...addDepo });
         } else {
+          // 存在するかつ削除モードの場合は登録リストに復帰
           if(this.mRegisterDepoList[regIdx]['mode'] == 'del') {
-            this.mRegisterDepoList.splice(regIdx,1);
+            this.mRegisterDepoList[regIdx]['mode'] = 'add';
           }
         }
       });
@@ -456,8 +492,9 @@ export default {
           delDepo['mode'] = 'del';
           this.mRegisterDepoList.push({ ...delDepo });
         } else {
+          // 存在するかつ追加モードの場合は登録リストから論理削除モードへ
           if(this.mRegisterDepoList[regIdx]['mode'] == 'add') {
-            this.mRegisterDepoList.splice(regIdx,1);
+            this.mRegisterDepoList[regIdx]['mode'] = 'del';
           }
         }
       });
@@ -474,28 +511,70 @@ export default {
       // 追加
       itemList.forEach(addItem => {
         // 既に親画面のリストに追加されているか判定
-        var idx = this.mChoiceItemList.map(function(item){
-          return item.itemCd
-        }).indexOf(addItem.itemCd);
-        if(idx == -1) {
-          // 存在しない場合のみ追加
-          app.$set(addItem,'isSelect',false);
-          this.mChoiceItemList.push({ ...addItem });
-        }
+        if(addItem.itemCd) {
+          // 商品単位での選択がされた場合
+          var idx = this.mChoiceItemList.map(function(item){
+            return item.itemCd
+          }).indexOf(addItem.itemCd);
+          if(idx == -1) {
+            // 存在しない場合のみ追加
+            app.$set(addItem,'isSelect',false);
+            this.mChoiceItemList.push({ ...addItem });
+          }
 
-        // サーバに渡す登録リストに追加
-        var regIdx = this.mRegisterItemList.map(function(item){
-          return item.itemCd
-        }).indexOf(addItem.itemCd);
-        if(regIdx == -1) {
-          addItem['mode'] = 'add';
-          this.mRegisterItemList.push({ ...addItem });
+          // サーバに渡す登録リストに追加
+          var regIdx = this.mRegisterItemList.map(function(item){
+            return item.itemCd
+          }).indexOf(addItem.itemCd);
+          if(regIdx == -1) {
+            addItem['mode'] = 'add';
+            this.mRegisterItemList.push({ ...addItem });
+          } else {
+            // 存在するかつ削除モードの場合は登録リストに復帰
+            if(this.mRegisterItemList[regIdx]['mode'] == 'del') {
+              this.mRegisterItemList[regIdx]['mode'] = 'add';
+            }
+          }
         } else {
-          if(this.mRegisterItemList[regIdx]['mode'] == 'del') {
-            this.mRegisterItemList.splice(regIdx,1);
+          // カテゴリ大、カテゴリ中の選択がされた場合
+          var choiceCheck = false;
+          [...this.mChoiceItemList].forEach((v, i) => {
+            if(
+              v.itemCategoryLargeCd == addItem.itemCategoryLargeCd &&
+              v.itemCategoryMediumCd == addItem.itemCategoryMediumCd &&
+              v.itemCd == addItem.itemCd
+            ) {
+              choiceCheck = true;
+            }
+          })
+          if (!choiceCheck) {
+            // 存在しない場合のみ追加
+            app.$set(addItem,'isSelect',false);
+            this.mChoiceItemList.push({ ...addItem });
+          }
+          var regCheck = false;
+          var regCheckNo = null;
+          [...this.mRegisterItemList].forEach((v, i) => {
+            if(
+              v.itemCategoryLargeCd == addItem.itemCategoryLargeCd &&
+              v.itemCategoryMediumCd == addItem.itemCategoryMediumCd &&
+              v.itemCd == addItem.itemCd
+            ) {
+              regCheck = true;
+            } else {
+              regCheckNo = i;
+            }
+          });
+          if (!regCheck) {
+            addItem['mode'] = 'add';
+            this.mRegisterItemList.push({ ...addItem });
+          } else {
+            // 存在するかつ削除モードの場合は登録リストに復帰
+            if(this.mRegisterItemList[regCheckNo]['mode'] == 'del') {
+              this.mRegisterItemList[regCheckNo]['mode'] = 'add';
+            }
           }
         }
-
       });
     },
     selectItem: function (item) {
@@ -525,8 +604,9 @@ export default {
           delItem['mode'] = 'del';
           this.mRegisterItemList.push({ ...delItem });
         } else {
+          // 存在するかつ追加モードの場合は登録リストから論理削除モードへ
           if(this.mRegisterItemList[regIdx]['mode'] == 'add') {
-            this.mRegisterItemList.splice(regIdx,1);
+            this.mRegisterItemList[regIdx]['mode'] = 'del';
           }
         }
       });
@@ -578,9 +658,9 @@ export default {
           addArea['mode'] = 'add';
           this.mRegisterAreaList.push({ ...addArea });
         } else {
-          // 存在するかつ削除モードの場合は登録リストから削除
+          // 存在するかつ削除モードの場合は登録リストに復帰
           if(this.mRegisterAreaList[regIdx]['mode'] == 'del') {
-            this.mRegisterAreaList.splice(regIdx,1);
+            this.mRegisterAreaList[regIdx]['mode'] = 'add';
           }
         }
       });
@@ -612,9 +692,9 @@ export default {
           delArea['mode'] = 'del';
           this.mRegisterAreaList.push({ ...delArea });
         } else {
-          // 存在するかつ追加モードの場合は登録リストから削除
+          // 存在するかつ追加モードの場合は登録リストから論理削除モードへ
           if(this.mRegisterAreaList[regIdx]['mode'] == 'add') {
-            this.mRegisterAreaList.splice(regIdx,1);
+            this.mRegisterAreaList[regIdx]['mode'] = 'del';
           }
         }
       });
@@ -1024,7 +1104,7 @@ export default {
     },
     /** 赤文字注釈期間表示 */
     calcDispDatePeriod: function(){
-      var fromYear = this.annoStartYear;
+      var fromYear = this.annoStartYear == String(this.$root.CONFIG.BASE_FROM_YESR) ? null : this.annoStartYear;
       var fromMonth = this.annoStartMonth;
       var fromDay = this.annoStartDate;
       var toYear = this.annoEndYear;

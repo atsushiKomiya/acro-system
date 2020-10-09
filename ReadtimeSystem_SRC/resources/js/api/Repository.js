@@ -5,9 +5,11 @@ const searchLeadtimePref = '/common/depoPrefList'
 
 const downloadCalendarConfirm = '/C_L10/download';
 const searchCalendarConfirm = '/C_L10/search';
+const countCalendarConfirm = '/C_L10/count';
 const approvalCalendarConfirm = '/C_L10/approval';
 
 const searchDefaultList = '/C_L20/search';
+const countDefaultList = '/C_L20/count';
 const downloadDefaultList = '/C_L20/download';
 
 const applicationDepoRequest = '/C_L11/application';
@@ -31,6 +33,7 @@ const searchDepoAddressList = '/C_L21/depoaddress/depoAddressList';
 
 const downloadIrregularList = '/C_L30/download';
 const searchIrregularList = '/C_L30/search';
+const countIrregularList = '/C_L30/count';
 
 const reflectIrregular = '/C_L31/irregular/reflect';
 const deleteIrregular = '/C_L31/irregular/delete';
@@ -73,10 +76,11 @@ export default {
             params: data
         });
     },
-    saveLeadtime(depoCd, leadtimeList) {
+    saveLeadtime(depoCd, leadtimeList, displayType) {
         return Client.post(`${saveLeadtime}`, {
             'depoCd': depoCd,
-            'leadtimeList': leadtimeList
+            'leadtimeList': leadtimeList,
+            'displayType': displayType,
         });
     },
     saveDepoItem(depoCd, depoItemList) {
@@ -196,6 +200,18 @@ export default {
             params: data
         });
     },
+    countCalendarConfirm(targetYm, prefCd, isNotApproval, isNotConfirm, displayType) {
+        var data = {
+            'searchYm': targetYm,
+            'searchPrefCd': prefCd,
+            'searchIsNotApproval': isNotApproval,
+            'searchIsNotConfirm': isNotConfirm,
+            'searchDisplayType': displayType,
+        }
+        return Client.get(`${countCalendarConfirm}`, {
+            params: data
+        });
+    },
     searchDefaultList(prefCd, depoCd, itemCategoryLargecd, itemCategoryMediumcd ,itemCd, isConfig) {
         var data = {
             'prefCd': prefCd,
@@ -206,6 +222,19 @@ export default {
             'isConfig': isConfig,
         }
         return Client.get(`${searchDefaultList}`, {
+            params: data
+        });
+    },
+    countDefaultList(prefCd, depoCd, itemCategoryLargecd, itemCategoryMediumcd ,itemCd, isConfig) {
+        var data = {
+            'prefCd': prefCd,
+            'depoCd': depoCd,
+            'itemCategoryLargecd': itemCategoryLargecd,
+            'itemCategoryMediumcd': itemCategoryMediumcd,
+            'itemCd': itemCd,
+            'isConfig': isConfig,
+        }
+        return Client.get(`${countDefaultList}`, {
             params: data
         });
     },
@@ -220,6 +249,12 @@ export default {
     },
     searchIrregularList(searchParam) {
         return Client.get(`${searchIrregularList}`, {
+            params: searchParam
+        });
+
+    },
+    countIrregularList(searchParam) {
+        return Client.get(`${countIrregularList}`, {
             params: searchParam
         });
 

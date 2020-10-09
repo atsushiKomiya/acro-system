@@ -192,7 +192,7 @@ class EloquentDepoDefaultRepository implements DepoDefaultRepositoryInterface
                 'ldg.display_type',
                 'ldg.rear_stand_flg',
             )
-            ->join('leadtime_display_group as ldg', 'ldg.display_type', '=', 'vd.display_group_type');
+            ->join('leadtime_display_group as ldg', 'ldg.display_group_type', '=', 'vd.display_group_type');
         if ($cond->spFlg) {
             $join_sub->where('ldg.display_type', 2);
         }
@@ -201,9 +201,10 @@ class EloquentDepoDefaultRepository implements DepoDefaultRepositoryInterface
         });
 
         $query->where('depo_default.congratulation_kbn_flg', 3)
-              ->orWhere('depo_default.congratulation_kbn_flg', 'HD.keicho');
-        if ($cond->handing_flg !== null) {
-            $query->where('depo_default.handing_flg', $cond->handing_flg);
+              ->orWhereColumn('depo_default.congratulation_kbn_flg', 'HD.keicho');
+        if ($cond->handing_flg == "1" || $cond->handing_flg == "0") {
+            $handing_flg = $cond->handing_flg == "1" ? 1 : 0;
+            $query->where('depo_default.handing_flg', $handing_flg);
         }
         if ($cond->huda == 5 || $cond->huda == 6) {
             $query->whereRaw(
@@ -226,7 +227,7 @@ class EloquentDepoDefaultRepository implements DepoDefaultRepositoryInterface
      */
     public function getUnnecessaryDepo()
     {
-        $query = $this->eloquent::query();
+        $query = $this->eloquent::withTrashed();
         $query->select(
             'depo_cd AS depoCd'
         );
@@ -245,8 +246,13 @@ class EloquentDepoDefaultRepository implements DepoDefaultRepositoryInterface
     public function deleteDepoDefaultUnnecessary($unnecessaryDepoList)
     {
         foreach ($unnecessaryDepoList as $value) {
-            $query = $this->eloquent::query();
-            $query->where('depo_cd', $value)->forceDelete();
+            $query = $this->eloquent::withTrashed() // 論理削除済みデータも対象
+                            ->where('depo_cd', $value);
+
+            // ロックが取得できない場合はエラーにする
+            $query->lock('for update nowait')->get();
+
+            $query->forceDelete();
         }
     }
 }

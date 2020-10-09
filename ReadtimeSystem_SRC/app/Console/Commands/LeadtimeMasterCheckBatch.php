@@ -76,7 +76,7 @@ class LeadtimeMasterCheckBatch extends Command
             // a）取得結果が0件だった場合
             //     終了ログ「不要デポCDリスト取得処理終了」を出力し、「３.カレンダー適用デポリスト生成処理」を実行する
             $unnecessaryDepoList = array();
-            if (empty($unnecessaryDepo)) {
+            if ($unnecessaryDepo->isEmpty()) {
                 BatchLog::info('不要デポCDリスト取得処理終了');
             // b）取得結果が上記以外の場合
             //     取得した情報から不要デポCDリスト（配列）を生成する
@@ -90,32 +90,41 @@ class LeadtimeMasterCheckBatch extends Command
                 //2.不要デポ情報削除処理
                 //[1]	開始ログ「不要デポ情報削除処理開始」を出力する
                 BatchLog::info('不要デポ情報削除処理開始');
+                $deletingTableName = '';
+
                 //[2]	トランザクション開始
                 try {
                     // DB::beginTransaction();
                     //[3]	「シート[DB] -2. デポカレンダーデフォルト情報不要データ削除」を実行する
+                    $deletingTableName = 'デポカレンダーデフォルト情報';
                     $this->depoDefaultUC->deleteDepoDefaultUnnecessary($unnecessaryDepoList);
                     //[4]	「シート[DB] -3.デポカレンダー情報不要データ削除」を実行する
+                    $deletingTableName = 'デポカレンダー情報';
                     $this->depoCalInfoUC->deleteDepoCalUnnecessary($unnecessaryDepoList);
                     //[5]	「シート[DB] -4. デポカレンダー情報‐tmp不要データ論理削除」を実行する
+                    $deletingTableName = 'デポカレンダー情報‐tmp';
                     $this->depoCalInfoTmpUC->deleteDepoCalTmpUnnecessary($unnecessaryDepoList);
                     //[6]	「シート[DB] -5. デポ取扱商品不要データ削除」を実行する
+                    $deletingTableName = 'デポ取扱商品';
                     $this->depoItemUC->deleteDepoItemUnnecessary($unnecessaryDepoList);
                     //[7]	「シート[DB] -6. デポ住所リードタイム情報不要データ削除」を実行する
+                    $deletingTableName = 'デポ住所リードタイム情報';
                     $this->depoAddressUC->deleteDepoAddressUnnecessary($unnecessaryDepoList);
                     //[8]	「シート[DB] -7. デポ承認情報不要データ論理削除」を実行する
+                    $deletingTableName = 'デポ承認情報';
                     $this->depoCalAprInfoUC->deleteDepoCalAprUnnecessary($unnecessaryDepoList);
                     // [9]	トランザクション終了
                     //     a）正常終了した場合
                     //         コミットを行い、終了ログ「不要デポ情報削除処理終了」を出力し、「３.カレンダー適用デポリスト生成処理」を実行
+                    $deletingTableName = '';
                     DB::commit();
                     BatchLog::info('不要デポ情報削除処理終了');
                 } catch (Exception $e) {
                     //     b）異常終了した場合
                     //         全件ロールバックを行い、エラーログ「【テーブル名】の削除処理でエラーが発生しました」を出力し処理終了
                     DB::rollBack();
-                    BatchLog::error('【テーブル名】の削除処理でエラーが発生しました');
-                    throw new Exception();
+                    BatchLog::error($deletingTableName . 'の削除処理でエラーが発生しました');
+                    throw $e;
                 }
             }
 
@@ -127,7 +136,7 @@ class LeadtimeMasterCheckBatch extends Command
             $updateTaisyoDepo = $this->depoUC->getUpdateTaisyoDepoList($ym);
             //     a）取得結果が0件だった場合
             //         終了ログ「カレンダー適用デポリスト生成処理終了」を出力し処理終了
-            if (empty($updateTaisyoDepo)) {
+            if ($updateTaisyoDepo->isEmpty()) {
                 BatchLog::info('カレンダー適用デポリスト生成処理終了');
             //     b）取得結果が上記以外の場合
             //         取得した情報から不要デポCDリスト（配列）を生成する

@@ -33,6 +33,8 @@ class EloquentPublicHolidayRepository implements PublicHolidayRepositoryInterfac
      */
     public function deletePublicHolidayList()
     {
+        // ロックが取得できない場合はエラーにする
+        $this->eloquent::withTrashed()->lock('for update nowait')->get();
         $result = $this->eloquent::truncate();
 
         return $result;

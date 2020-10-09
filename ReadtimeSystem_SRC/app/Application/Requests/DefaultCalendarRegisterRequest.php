@@ -2,17 +2,12 @@
 
 namespace App\Application\Requests;
 
+use App\Infrastructure\Traits\ShainOnlyRequest;
+
 class DefaultCalendarRegisterRequest extends ApiRequest
 {
-    /**
-     * 認証有無
-     *
-     * @return boolean
-     */
-    public function authorize()
-    {
-        return true;
-    }
+    /** 社員のみ実行可能 */
+    use ShainOnlyRequest;
 
     /**
      * バリデーション
@@ -46,7 +41,7 @@ class DefaultCalendarRegisterRequest extends ApiRequest
             'privateHomeFlg'   => 'required|boolean',
             'handingFlg'   => 'required|boolean',
             'congratulationKbnFlg'   => 'required|between:1,4|numeric',
-            'transferPostDepoCd'   => 'numeric',
+            'transferPostDepoCd'   => 'nullable|numeric',
             'depoLeadTime'   => 'required|between:0,99|integer',
         ];
     }

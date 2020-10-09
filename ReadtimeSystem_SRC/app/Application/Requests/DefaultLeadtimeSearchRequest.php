@@ -2,20 +2,15 @@
 
 namespace App\Application\Requests;
 
+use App\Infrastructure\Traits\ShainOnlyRequest;
+
 /**
  * デフォルト設定リードタイム情報検索リクエスト
  */
 class DefaultLeadtimeSearchRequest extends ApiRequest
 {
-    /**
-     * 認証有無
-     *
-     * @return boolean
-     */
-    public function authorize()
-    {
-        return true;
-    }
+    /** 社員のみ実行可能 */
+    use ShainOnlyRequest;
 
     /**
      * バリデーション

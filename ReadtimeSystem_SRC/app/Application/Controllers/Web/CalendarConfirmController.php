@@ -15,6 +15,12 @@ use Illuminate\Support\Facades\Config;
 class CalendarConfirmController extends WebController
 {
 
+    public function __construct()
+    {
+        parent::__construct();
+        $this->middleware('check.auth');
+    }
+
     /**
      * 初期表示
      *

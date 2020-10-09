@@ -23,7 +23,7 @@ class TestBatch extends Command
      *
      * @var string
      */
-    protected $description = 'CreanUPバッチ';
+    protected $description = 'CleanUPバッチ';
 
     /**
      * Create a new command instance.

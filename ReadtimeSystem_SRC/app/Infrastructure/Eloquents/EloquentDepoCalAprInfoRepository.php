@@ -67,15 +67,25 @@ class EloquentDepoCalAprInfoRepository implements DepoCalAprInfoRepositoryInterf
     /**
      * 指定年月以降の承認情報を論理削除する
      *
-     * @param [type] $depocd
-     * @param [type] $deliveryDate
+     * @param integer $depocd
+     * @param string $deliveryDate
+     * @param string $userId
      * @return void
      */
-    public function deleteDepoCalAprInfo($depocd, $deliveryDate)
+    public function deleteDepoCalAprInfo($depocd, $deliveryDate, $userId)
     {
-        $result = $this->eloquent::where('depo_cd', $depocd)
-        ->whereRaw("cast(date_ym as integer) >= " . $deliveryDate)
-        ->delete();
+        $query = $this->eloquent::where('depo_cd', $depocd)
+                                ->whereRaw("cast(date_ym as integer) >= " . $deliveryDate);
+
+        // ロックが取得できない場合はエラーにする
+        $query->lock('for update nowait')->get();
+
+        $result = $query->update(
+            [
+                'deleted_id' => $userId,
+                'deleted_at' => now()
+            ]
+        );
 
         return $result;
     }
@@ -235,6 +245,26 @@ class EloquentDepoCalAprInfoRepository implements DepoCalAprInfoRepositoryInterf
         }
 
         return $resultList;
+    }
+
+    /**
+     * デポカレンダー件数取得
+     *
+     * @param string $ym
+     * @param integer $pref
+     * @param boolean $isNotApproval
+     * @param boolean $isNotConfirm
+     * @param integer $displayType
+     * @param array $ymdList
+     * @return int
+     */
+    public function countDepoCalendarList(string $ym, ?int $pref, bool $isNotApproval, bool $isNotConfirm, int $displayType, array $ymdList): int
+    {
+        $query = $this->queryFindDepoCalendarList($ym, $pref, $isNotApproval, $isNotConfirm, $displayType, $ymdList);
+
+        $result = $query->count();
+        return $result;
+
     }
 
     /**
@@ -496,27 +526,37 @@ class EloquentDepoCalAprInfoRepository implements DepoCalAprInfoRepositoryInterf
      * デポ承認情報不要データ論理削除
      *
      * @param array $unnecessaryDepoList
+     * @return void
      */
     public function deleteDepoCalAprUnnecessary($unnecessaryDepoList)
     {
         foreach ($unnecessaryDepoList as $value) {
-            $result = $this->eloquent::whereNull('deleted_at')
-            ->where('depo_cd', $value)
-            ->delete();
+            $query = $this->eloquent::withTrashed() // 論理削除済みデータも対象
+                            ->where('depo_cd', $value);
+
+            // ロックが取得できない場合はエラーにする
+            $query->lock('for update nowait')->get();
+
+            $query->forceDelete();
         }
     }
     
     /**
-     * 【C_LB_03】CreanUPバッチ
+     * 【C_LB_03】CleanUPバッチ
      * デポカレンダ－承認情報論理削除
+     * @param string $criterionYm 削除基準年月
+     * @param string $userId
      * @return void
      */
-    public function deleteDepoCalAprInfoCreanUp($criterionDate, $userId)
+    public function deleteDepoCalAprInfoCleanUp($criterionYm, $userId)
     {
         $query = $this->eloquent::query();
-        $query->where('date_ym', '<', $criterionDate)
-        ->whereNull('deleted_at')
-        ->update(
+        $query->where('date_ym', '<', $criterionYm);
+
+        // ロックが取得できない場合はエラーにする
+        $query->lock('for update nowait')->get();
+
+        $query->update(
             [
                 'deleted_id' => $userId,
                 'deleted_at' => now()
@@ -568,6 +608,9 @@ class EloquentDepoCalAprInfoRepository implements DepoCalAprInfoRepositoryInterf
             $query->where('depo_cal_info.delivery_date', '>=', $dateFrom);
             $query->where('depo_cal_info.delivery_date', '<=', $dateTo);
 
+        } else {
+            $now = Carbon::now()->format('Y-m-d');
+            $query->where('depo_cal_info.delivery_date', '>=', $now);
         }
 
         // 曜日

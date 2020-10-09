@@ -6,6 +6,10 @@ table {
   width: 100%;
 }
 
+table thead tr:nth-child(2) th {
+  top: 26px;
+}
+
 table thead th {
   border: 1px solid #ffffff !important;
 }
@@ -47,7 +51,7 @@ table tbody tr td {
   position: sticky;
   left: 0;
   background: #ffffff !important;
-  z-index: 6 !important;
+  z-index: 5 !important;
   text-align: center;
 }
 

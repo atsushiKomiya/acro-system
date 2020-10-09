@@ -29,6 +29,10 @@ table tbody tr td {
     text-align: center;
 }
 
+.disabled-row {
+    color: #A6A6A6;
+}
+
 .target-dayofname {
     width: 110px;
     text-align: center;
@@ -292,4 +296,100 @@ table tbody tr td {
 .div-indent {
     padding-left: 15px;
     width: 100%;
+}
+
+.accordion-info {
+    text-align: center;
+    padding: 10px 0;
+}
+
+.accordion-info a {
+    text-decoration: none;
+    display: inline-block;
+}
+
+.arrow-up {
+    border-top: solid 2px #3490dc;
+    border-left: solid 2px #3490dc;
+    width: 10px;
+    height: 10px;
+    transform: rotate(45deg);
+    display: inline-block;
+    margin-bottom: -2px;
+    margin-right: 6px;
+}
+.arrow-down {
+    border-bottom: solid 2px #3490dc;
+    border-right: solid 2px #3490dc;
+    margin-top: 16px;/*なくてもOK*/
+    width: 10px;
+    height: 10px;
+    transform: rotate(45deg);
+    display: inline-block;
+    margin-bottom: 2px;
+    margin-right: 6px;
+}
+
+.arrow-up:hover {
+    border-top: solid 2px #1d68a7;
+    border-left: solid 2px #1d68a7;
+}
+.arrow-down:hover {
+    border-bottom: solid 2px #1d68a7;
+    border-right: solid 2px #1d68a7;
+}
+.accordion--target {
+    overflow: hidden;
+    -webkit-transition: height 0.4s ease-in-out;
+    transition: height 0.4s ease-in-out;
+}
+.accordion-enter-active {
+    -webkit-animation-duration: 1s;
+    animation-duration: 1s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    -webkit-animation-name: accordion--anime__opend;
+    animation-name: accordion--anime__opend;
+}
+.accordion-leave-active {
+    -webkit-animation-duration: 1s;
+    animation-duration: 1s;
+    -webkit-animation-fill-mode: both;
+    animation-fill-mode: both;
+    -webkit-animation-name: accordion--anime__closed;
+    animation-name: accordion--anime__closed;
+}
+
+@-webkit-keyframes accordion--anime__opend {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+
+@keyframes accordion--anime__opend {
+    0% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+}
+@-webkit-keyframes accordion--anime__closed {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+@keyframes accordion--anime__closed {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }

@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Config;
  */
 class IrregularListController extends WebController
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->middleware('check.auth');
+    }
+
     /**
      * 初期表示
      *

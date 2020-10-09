@@ -18,6 +18,7 @@ class AreaSelectController extends WebController
     {
         parent::__construct();
         $this->middleware('check.direct.access');
+        $this->middleware('check.auth');
     }
 
     /**

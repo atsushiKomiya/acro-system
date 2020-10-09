@@ -42,14 +42,14 @@ class AppUtility
     }
     
     /**
-     * ダウンロードファイル名を生成する
+     * タイムスタンプ付きCSVファイル名を生成する
      *
-     * @param [type] $screenId
-     * @return string
+     * @param string $screenId
+     * @return string $timestampFormat タイムスタンプ部分のフォーマット文字列（デフォルト'YmdHis'）
      */
-    public static function createFileName(string $screenId): string
+    public static function createFileName(string $screenId, string $timestampFormat='YmdHis'): string
     {
-        return $screenId . '_' . \Carbon\Carbon::now()->format('YmdHis') . '.csv';
+        return $screenId . '_' . \Carbon\Carbon::now()->format($timestampFormat) . '.csv';
     }
 
     /**

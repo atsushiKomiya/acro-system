@@ -45,20 +45,13 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
     public function findAnnoMessageList(MessageSearchEntity $entity): array
     {
         // ---------- 一時テーブル（赤字注釈の絞り込み） Query ----------
-        $subIrregularQuery = $this->eloquent::select(
-            'irregular_id'
-        )->whereNotNull(
-            'irregular.anno_from'
-        )->whereNotNull(
-            'irregular.anno_to'
-        )->whereNull(
-            'irregular.deleted_at'
-        );
+        $subIrregularQuery = $this->eloquent::select('irregular_id');
         // 日付が存在する場合は日付も条件に設定する
         if ($entity->deliveryDateList) {
             $deliveryDateList = $entity->deliveryDateList;
             // 赤字注釈（通年以外）
             $subIrregularQuery->orWhere(function($subIrregularQuery) use($deliveryDateList) {
+                $subIrregularQuery->whereNotNull('anno_from')->whereNotNull('anno_to')->whereNull('irregular.deleted_at');
                 $subIrregularQuery->whereRaw("to_char(anno_from, 'YYYY') <> '" . AppConst::ALL_YEAR_ROUND_FROM . "'");
                 $subIrregularQuery->whereRaw("to_char(anno_to, 'YYYY') <> '" . AppConst::ALL_YEAR_ROUND_TO . "'");
                 $subIrregularQuery->where(function($subIrregularQuery) use($deliveryDateList){
@@ -73,6 +66,7 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             });
             // 赤字注釈（通年　通常）
             $subIrregularQuery->orWhere(function($subIrregularQuery) use($deliveryDateList) {
+                $subIrregularQuery->whereNotNull('anno_from')->whereNotNull('anno_to')->whereNull('irregular.deleted_at');
                 $subIrregularQuery->whereRaw("to_char(anno_from, 'YYYY') = '" . AppConst::ALL_YEAR_ROUND_FROM . "'");
                 $subIrregularQuery->whereRaw("to_char(anno_to, 'YYYY') = '" . AppConst::ALL_YEAR_ROUND_TO . "'");
                 $subIrregularQuery->whereRaw("to_char(anno_from, 'MMDD') <=  to_char(anno_to, 'MMDD')");
@@ -88,6 +82,7 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             });
             // 赤字注釈（通年　年跨ぎ）
             $subIrregularQuery->orWhere(function($subIrregularQuery) use($deliveryDateList) {
+                $subIrregularQuery->whereNotNull('anno_from')->whereNotNull('anno_to')->whereNull('irregular.deleted_at');
                 $subIrregularQuery->whereRaw("to_char(anno_from, 'YYYY') = '" . AppConst::ALL_YEAR_ROUND_FROM . "'");
                 $subIrregularQuery->whereRaw("to_char(anno_to, 'YYYY') = '" . AppConst::ALL_YEAR_ROUND_TO . "'");
                 $subIrregularQuery->whereRaw("to_char(anno_from, 'MMDD') >  to_char(anno_to, 'MMDD')");
@@ -111,6 +106,7 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
 
         // 期間
         if ($entity->deliveryDateFrom && $entity->deliveryDateTo) {
+            $subIrregularQuery->whereNotNull('anno_from')->whereNotNull('anno_to')->whereNull('irregular.deleted_at');
             $dateFrom = Carbon::parse($entity->deliveryDateFrom)->format('Y-m-d');
             $dateTo = Carbon::parse($entity->deliveryDateTo)->format('Y-m-d');
             // 赤字注釈（通年以外）
@@ -124,6 +120,7 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             });
             // 赤字注釈（通年　通常）
             $subIrregularQuery->orWhere(function($subIrregularQuery) use($dateFrom,$dateTo) {
+                $subIrregularQuery->whereNotNull('anno_from')->whereNotNull('anno_to')->whereNull('irregular.deleted_at');
                 $subIrregularQuery->whereRaw("to_char(anno_from, 'YYYY') = '" . AppConst::ALL_YEAR_ROUND_FROM . "'");
                 $subIrregularQuery->whereRaw("to_char(anno_to, 'YYYY') = '" . AppConst::ALL_YEAR_ROUND_TO . "'");
                 $subIrregularQuery->whereRaw("to_char(anno_from, 'MMDD') <=  to_char(anno_to, 'MMDD')");
@@ -136,6 +133,7 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             });
             // 赤字注釈（通年　年跨ぎ）
             $subIrregularQuery->orWhere(function($subIrregularQuery) use($dateFrom,$dateTo) {
+                $subIrregularQuery->whereNotNull('anno_from')->whereNotNull('anno_to')->whereNull('irregular.deleted_at');
                 $subIrregularQuery->whereRaw("to_char(anno_from, 'YYYY') = '" . AppConst::ALL_YEAR_ROUND_FROM . "'");
                 $subIrregularQuery->whereRaw("to_char(anno_to, 'YYYY') = '" . AppConst::ALL_YEAR_ROUND_TO . "'");
                 $subIrregularQuery->whereRaw("to_char(anno_from, 'MMDD') >  to_char(anno_to, 'MMDD')");
@@ -147,6 +145,12 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
                 });
             });
 
+        }
+
+        // お届け日、期間のどちらも未指定
+        if (count($entity->deliveryDateList) == 0 && $entity->deliveryDateFrom == null && $entity->deliveryDateTo == null) {
+            // 赤文字注釈期間がnullでない、かつ、削除日がnullの条件設定
+            $subIrregularQuery->whereNotNull('anno_from')->whereNotNull('anno_to')->whereNull('irregular.deleted_at');
         }
 
         // ---------- メイン Query ----------
@@ -343,7 +347,7 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
                     }
                 }
             }
-            
+
             if ($params) {
                 $subDayofweekQuery->where(function ($subDayofweekQuery) use ($params) {
                     foreach ($params as $param) {
@@ -384,12 +388,10 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             // 条件
             $mainQuery->where(function ($mainQuery) use ($entity) {
                 $mainQuery->orWhere('irregular.is_depo', '0');
-                if ($entity->depoCdList) {
-                    $mainQuery->orWhere(function ($mainQuery) {
-                        $mainQuery->where('irregular.is_depo', '1');
-                        $mainQuery->whereNotNull('irregular_depo.irregular_id');
-                    });
-                }
+                $mainQuery->orWhere(function ($mainQuery) {
+                    $mainQuery->where('irregular.is_depo', '1');
+                    $mainQuery->whereNotNull('irregular_depo.irregular_id');
+                });
             });
         }
 
@@ -426,19 +428,17 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             // 条件
             $mainQuery->where(function ($mainQuery) use ($entity) {
                 // 商品
-                $mainQuery->orWhere('irregular.is_item', '0');
-                if ($entity->itemList) {
-                    $mainQuery->orWhere(function ($mainQuery) {
-                        $mainQuery->where('irregular.is_item', '1');
-                        $mainQuery->whereNotNull('irregular_item.irregular_id');
-                    });
-                }
+                $mainQuery->where('irregular.is_item', '0');
+                $mainQuery->orWhere(function ($mainQuery) {
+                    $mainQuery->where('irregular.is_item', '1');
+                    $mainQuery->whereNotNull('irregular_item.irregular_id');
+                });
             });
         }
 
         // 住所
         if ($entity->addressList) {
-            // ------------- 住所 SubQuery ---------------            
+            // ------------- 住所 SubQuery ---------------
             $subAreaQuery = DB::table('irregular_area')->select(
                 'irregular_id'
             )->whereNull(
@@ -446,20 +446,23 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             )->groupBy(
                 'irregular_id'
             );
-            
-            foreach($entity->addressList as $address) {
-                $subAreaQuery->orWhere(function($subAreaQuery) use($address){
-                    if($address->pref) {
-                        $subAreaQuery->where('pref_cd',$address->pref);
-                    }
-                    if($address->siku) {
-                        $subAreaQuery->where('siku',$address->siku);
-                    }
-                    if($address->tyou) {
-                        $subAreaQuery->where('tyou',$address->tyou);
-                    }
-                });
-            }
+
+            $subAreaQuery->where(function ($subAreaQuery) use ($entity) {
+
+                foreach($entity->addressList as $address) {
+                    $subAreaQuery->orWhere(function($subAreaQuery) use($address){
+                        if($address->pref) {
+                            $subAreaQuery->where('pref_cd',$address->pref);
+                        }
+                        if($address->siku) {
+                            $subAreaQuery->where('siku',$address->siku);
+                        }
+                        if($address->tyou) {
+                            $subAreaQuery->where('tyou',$address->tyou);
+                        }
+                    });
+                }
+            });
             // 結合
             $mainQuery->leftJoinSub($subAreaQuery, 'irregular_area', function ($join) {
                 $join->on('irregular_area.irregular_id', '=', 'irregular.irregular_id');
@@ -467,12 +470,10 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             // 条件
             $mainQuery->where(function ($mainQuery) use ($entity) {
                 $mainQuery->orWhere('irregular.is_area', '0');
-                if ($entity->addressList) {
-                    $mainQuery->orWhere(function ($mainQuery) {
-                        $mainQuery->where('irregular.is_area', '1');
-                        $mainQuery->whereNotNull('irregular_area.irregular_id');
-                    });
-                }
+                $mainQuery->orWhere(function ($mainQuery) {
+                    $mainQuery->where('irregular.is_area', '1');
+                    $mainQuery->whereNotNull('irregular_area.irregular_id');
+                });
             });
         }
 
@@ -655,17 +656,17 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             'irregular.is_personal_delivery',
             'irregular.delivery_date_type',
             'irregular.delivery_date',
-            'irregular.delivery_date_from',
-            'irregular.delivery_date_to',
+            DB::raw('tsunen_from(irregular.delivery_date_from) AS delivery_date_from'),
+            DB::raw('tsunen_to(irregular.delivery_date_from, irregular.delivery_date_to) AS delivery_date_to'),
             'irregular.order_date_type',
             'irregular.order_date',
-            'irregular.order_date_from',
-            'irregular.order_date_to',
+            DB::raw('tsunen_from(irregular.order_date_from) AS order_date_from'),
+            DB::raw('tsunen_to(irregular.order_date_from, irregular.order_date_to) AS order_date_to'),
             'irregular.is_depo',
             'irregular.is_item',
             'irregular.is_area',
-            'irregular.anno_from',
-            'irregular.anno_to',
+            DB::raw('tsunen_from(irregular.anno_from) AS anno_from'),
+            DB::raw('tsunen_to(irregular.anno_from, irregular.anno_to) AS anno_to'),
             'irregular.anno_addr',
             'irregular.anno_period',
             'irregular.anno_trans',
@@ -684,8 +685,8 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
         ->whereNull('irregular.deleted_at');
 
         $query->where(function ($query) use ($cond) {
-            $query->where(function ($query) use ($cond) {
-                $query->where('irregular.is_item', false);
+            $query->where(function ($query) {
+                $query->where('irregular.is_item', 0);
             })
             ->orWhere(function ($query) use ($cond) {
                 $query->where('irregular_item.lcat_cd', $cond->lcat_cd)
@@ -704,8 +705,8 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             });
         });
         $query->where(function ($query) use ($cond) {
-            $query->where(function ($query) use ($cond) {
-                $query->where('irregular.is_area', false);
+            $query->where(function ($query) {
+                $query->where('irregular.is_area', 0);
             })
             ->orWhere(function ($query) use ($cond) {
                 $query->where('irregular_area.pref_cd', $cond->pref_cd)
@@ -739,18 +740,19 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
     }
 
     /**
-     * イレギュラー情報リスト取得
+     * イレギュラー情報リストクエリ
      *
      * @param IrregularListSearchEntity $cond
-     * @return LazyCollection
+     * @return Object 
      */
-    public function findIrregularList(IrregularListSearchEntity $searchCondition): LazyCollection
+    private function irregularListQuery(IrregularListSearchEntity $searchCondition)
     {
         // 一時 query
         $subQuery = $this->eloquent::select(
             'irregular.irregular_id',
             'irregular.irregular_type',
             'irregular.title',
+            'irregular.is_valid',
             DB::raw("array_to_string(ARRAY(SELECT unnest(array_agg(DISTINCT depo.depocd ))), ',') AS depo_cd"),
             DB::raw("array_to_string(ARRAY(SELECT unnest(array_agg(DISTINCT '【' || depo.depocd::varchar(255) || '】' ||  depo.deponame))), ',') AS depo_name"),
             DB::raw("ARRAY(SELECT unnest(array_agg(DISTINCT depo.depocd))) AS depo_cd_list"),
@@ -872,9 +874,20 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             // 部分一致
             $query->where('irregular_tmp.title', 'LIKE', '%' . $searchCondition->searchTitle . '%');
         }
-        // デポ名
-        if ($searchCondition->searchDepocd) {
-            $query->whereRaw('? = ANY (irregular_tmp.depo_cd_list)', [$searchCondition->searchDepocd]);
+        // デポ複数
+        if ($searchCondition->searchChoiceDepoList) {
+            $choiceDepoList = $searchCondition->searchChoiceDepoList;
+            $query->where(function ($query) use ($choiceDepoList) {
+                foreach ($choiceDepoList as $depodata) {
+                    if (is_string($depodata)) {
+                        $depodata = json_decode($depodata);
+                        $depocd = $depodata->depocd;
+                    } else {
+                        $depocd = $depodata['depocd'];
+                    }
+                    $query->orWhereRaw('? = ANY (irregular_tmp.depo_cd_list)', $depocd);
+                }
+            });
         }
         // 用途
         if ($searchCondition->searchCUseCd) {
@@ -882,7 +895,7 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
         }
         // 有効区分
         if (!is_null($searchCondition->searchIsValid)) {
-            $query->where('irregular_tmp.is_valid', $searchCondition->searchIsValid);
+            $query->where('irregular_tmp.is_valid', (int) $searchCondition->searchIsValid);
         }
         // 当日配送不可
         if ($searchCondition->searchIsTodayDelivery) {
@@ -902,23 +915,57 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
         }
         // 配送時間
         if ($searchCondition->searchDeliveryTime) {
-            $query->where('irregular_tmp.time_select', '<=', $searchCondition->searchDeliveryTime);
+            $query->where('irregular_tmp.time_select', '=', $searchCondition->searchDeliveryTime);
         }
-        // 振替先配送デポ名
-        if ($searchCondition->searchTransDepocd) {
-            $query->where('irregular_tmp.trans_depo_cd', $searchCondition->searchTransDepocd);
+        // 振替先配送デポ複数
+        if ($searchCondition->searchChoiceTransDepoList) {
+            $choiceDepoList = $searchCondition->searchChoiceTransDepoList;
+            $query->where(function ($query) use ($choiceDepoList) {
+                foreach ($choiceDepoList as $depodata) {
+                    if (is_string($depodata)) {
+                        $depodata = json_decode($depodata);
+                        $depocd = $depodata->depocd;
+                    } else {
+                        $depocd = $depodata['depocd'];
+                    }
+                    $query->orWhereRaw('? = ANY (irregular_tmp.trans_depo_cd)', $depocd);
+                }
+            });
         }
-        // 商品カテゴリ大
-        if ($searchCondition->searchItemCategoryLargecd) {
-            $query->whereRaw('? = ANY (irregular_tmp.lcat_cd_list)', [$searchCondition->searchItemCategoryLargecd]);
-        }
-        // 商品カテゴリ中
-        if ($searchCondition->searchItemCategoryMediumcd) {
-            $query->whereRaw('? = ANY (irregular_tmp.mcat_cd_list)', [$searchCondition->searchItemCategoryMediumcd]);
-        }
-        // 商品CD
-        if ($searchCondition->searchItemCd) {
-            $query->whereRaw('? = ANY (irregular_tmp.item_cd_list)', [$searchCondition->searchItemCd]);
+        if ($searchCondition->searchItemList) {
+            $itemList = $searchCondition->searchItemList;
+            $query->where(function ($query) use($itemList) {
+                foreach ($itemList as $item) {
+                    $query->orWhere(function ($query) use ($item) {
+                        if (is_string($item)) {
+                            $item = json_decode($item);
+                            $largeCd = $item->itemCategoryLargeCd;
+                            $mediumCd = $item->itemCategoryMediumCd;
+                            $itemCd = $item->itemCd;
+                        } else {
+                            $largeCd = $item['itemCategoryLargeCd'];
+                            $mediumCd = $item['itemCategoryMediumCd'];
+                            $itemCd = $item['itemCd'];
+                        }
+                        if ($mediumCd != null && $itemCd != null) {
+                            // カテゴリ大
+                            $query->whereRaw('? = ANY (irregular_tmp.lcat_cd_list)', [$largeCd])
+                            // カテゴリ中
+                            ->whereRaw('? = ANY (irregular_tmp.mcat_cd_list)', [$mediumCd])
+                            // 商品名
+                            ->whereRaw('? = ANY (irregular_tmp.item_cd_list)', $itemCd);
+                        } elseif ($mediumCd != null && $itemCd == null) {
+                            // カテゴリ大
+                            $query->whereRaw('? = ANY (irregular_tmp.lcat_cd_list)', [$largeCd])
+                            // カテゴリ中
+                            ->whereRaw('? = ANY (irregular_tmp.mcat_cd_list)', [$mediumCd]);
+                        } else {
+                            // カテゴリ大
+                            $query->whereRaw('? = ANY (irregular_tmp.lcat_cd_list)', [$largeCd]);
+                        }
+                    });
+                }
+            });
         }
         // お届け
         if ($searchCondition->searchDeliveryDateType) {
@@ -931,8 +978,8 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
                 $from = $searchCondition->searchDeliveryPeriodStart;
                 $to = $searchCondition->searchDeliveryPeriodEnd;
                 $query->where(function ($query) use ($from, $to) {
-                    $query->where('irregular_tmp.delivery_date_from', '<=', $from)
-                    ->where('irregular_tmp.delivery_date_to', '>=', $to);
+                    $query->whereRaw('? <= irregular_tmp.delivery_date_to', $from)
+                    ->whereRaw('irregular_tmp.delivery_date_from <= ?', $to);
                 });
             }
             // 曜日絞り込み
@@ -965,9 +1012,8 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
                 $from = $searchCondition->searchOrderPeriodStart;
                 $to = $searchCondition->searchOrderPeriodEnd;
                 $query->where(function ($query) use ($from, $to) {
-                    $query
-                    ->where('irregular_tmp.order_date_from', '<', $from)
-                    ->where('irregular_tmp.order_date_to', '>', $to);
+                    $query->whereRaw('? <= irregular_tmp.order_date_to', $from)
+                    ->whereRaw('irregular_tmp.order_date_from <= ?', $to);
                 });
             }
             // 曜日絞り込み
@@ -994,7 +1040,9 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             $zipcdList = $searchCondition->searchZipcdList;
             $query->where(function ($query) use ($zipcdList) {
                 foreach ($zipcdList as $zipCd) {
-                    $query->orWhereRaw('? = ANY (irregular_tmp.zip_cd_list)', [$zipCd]);
+                    if($zipCd != 'null') {
+                        $query->orWhereRaw('? = ANY (irregular_tmp.zip_cd_list)', [$zipCd]);
+                    }
                 }
             });
         }
@@ -1003,7 +1051,9 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             $prefList = $searchCondition->searchPrefList;
             $query->where(function ($query) use ($prefList) {
                 foreach ($prefList as $pref) {
-                    $query->orWhereRaw('? = ANY (irregular_tmp.pref_cd_list)', [$pref]);
+                    if($pref != 'null') {
+                        $query->orWhereRaw('? = ANY(irregular_tmp.pref_cd_list)', $pref);
+                    }
                 }
             });
         }
@@ -1012,7 +1062,9 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             $sikuList = $searchCondition->searchSikuList;
             $query->where(function ($query) use ($sikuList) {
                 foreach ($sikuList as $siku) {
-                    $query->orWhereRaw('? = ANY (irregular_tmp.siku_list)', [$siku]);
+                    if($siku != 'null') {
+                        $query->orWhereRaw('? = ANY (irregular_tmp.siku_list)', [$siku]);
+                    }
                 }
             });
         }
@@ -1021,17 +1073,44 @@ class EloquentIrregularRepository implements IrregularRepositoryInterface
             $tyouList = $searchCondition->searchTyouList;
             $query->where(function ($query) use ($tyouList) {
                 foreach ($tyouList as $tyou) {
-                    $query->orWhereRaw('? = ANY (irregular_tmp.tyou_list)', [$tyou]);
+                    if($tyou != 'null') {
+                        $query->orWhereRaw('? = ANY (irregular_tmp.tyou_list)', [$tyou]);
+                    }
                 }
             });
         }
 
         // 並び替え
         $query->orderBy('irregular_tmp.irregular_id', 'ASC');
+        return $query;
+    }
+
+    /**
+     * イレギュラー情報リスト取得
+     *
+     * @param IrregularListSearchEntity $cond
+     * @return LazyCollection
+     */
+    public function findIrregularList(IrregularListSearchEntity $searchCondition): LazyCollection
+    {
+        $query = $this->irregularListQuery($searchCondition);
 
         // 取得
         $result = $query->cursor();
 
+        return $result;
+    }
+
+    /**
+     * イレギュラー件数取得
+     * 
+     * @param IrregularListSearchEntity $condition
+     * @return int
+     */
+    public function countIrregularList(IrregularListSearchEntity $condition): int
+    {
+        $query = $this->irregularListQuery($condition);
+        $result = $query->count();
         return $result;
     }
 

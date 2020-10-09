@@ -21,6 +21,7 @@ class ItemSelectController extends WebController
     {
         parent::__construct();
         $this->middleware('check.direct.access');
+        $this->middleware('check.auth');
     }
 
     /**
@@ -79,7 +80,7 @@ class ItemSelectController extends WebController
         $itemCategoryMediumList = $itemCategoryMediumUseCase->findItemCategoryMediumList();
 
         //商品
-        $viewItemList = $itemUseCase->findViewItemList();
+        $viewItemList = $itemUseCase->findViewCategoryItemList();
 
         //パラメータ区分
         //$isList = ((bool)$request->get('isList'));

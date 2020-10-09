@@ -2,17 +2,12 @@
 
 namespace App\Application\Requests;
 
+use App\Infrastructure\Traits\ShainOrOwnDepoOnlyRequest;
+
 class DepoApplicationRequest extends ApiRequest
 {
-    /**
-     * 認証有無
-     *
-     * @return boolean
-     */
-    public function authorize()
-    {
-        return true;
-    }
+    /** 社員、またはデポユーザーで自分のデポ対象のみ実行可能 */
+    use ShainOrOwnDepoOnlyRequest;
 
     /**
      * バリデーション

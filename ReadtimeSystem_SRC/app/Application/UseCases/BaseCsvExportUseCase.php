@@ -133,6 +133,8 @@ class BaseCsvExportUseCase
     private function makeCsv($csvTypeName, $cursors, $fullname, $headerCallback = null, $dataCallback = null)
     {
         $createCsvFile = fopen($fullname, 'w');
+        // fwrite($createCsvFile, "\xEF\xBB\xBF");
+        // stream_filter_prepend($createCsvFile,'convert.iconv.utf-8/cp932');
         if (is_null($headerCallback)) {
             $columns = $this->getColumns($csvTypeName);
             $headers = $this->getHeaders($csvTypeName);
@@ -154,20 +156,29 @@ class BaseCsvExportUseCase
 
         // header作成
         if ($headers != null) {
-            $headerLine = $this->toCsvHeader($headers);
-            fputs($createCsvFile, $headerLine);
+            // foreach ($headers as $key => $val) {
+            //     $headers[$key] = mb_convert_encoding($val, "SJIS", mb_detect_encoding($val));
+            // }
+            // $headerLine = $this->toCsvHeader($headers);
+            // fputs($createCsvFile, $headerLine);
+            fputcsv($createCsvFile, $headers);
         }
 
-        foreach ($cursors as $cursor) {
-            // 独自加工がある場合
-            $model = is_null($dataCallback) ? $cursor : \call_user_func($dataCallback, $cursor);
-            $csv = [];
-            foreach ($columns as $col) {
-                $csv[] = $model[$col];
-            }
-            $line = $this->toCsv($csv, $options);
-            \fputs($createCsvFile, $line);
-        }
+        // foreach ($cursors as $cursor) {
+        //     // 独自加工がある場合
+        //     $model = is_null($dataCallback) ? $cursor : \call_user_func($dataCallback, $cursor);
+        //     $csv = [];
+        //     foreach ($columns as $col) {
+        //         $test = mb_detect_encoding($model[$col]);
+        //         $csv[] = $model[$col];
+        //         // $data = $model[$col];
+        //         // $data = mb_convert_encoding($data, "SJIS", mb_detect_encoding($data));
+        //         // $csv[] = $data;
+        //     }
+        //     // $line = $this->toCsv($csv, $options);
+        //     // \fputs($createCsvFile, $line);
+        //     fputcsv($createCsvFile, $csv);
+        // }
 
         fclose($createCsvFile);
     }
@@ -196,6 +207,7 @@ class BaseCsvExportUseCase
             fputs($createCsvFile, $headerLine);
         }
 
+        $depoItemList = [];
         foreach ($cursors as $cursor) {
             // 独自加工がある場合
             $model = is_null($callback) ? $cursor : \call_user_func($callback, $cursor);
@@ -204,10 +216,16 @@ class BaseCsvExportUseCase
             foreach ($columns as $col) {
                 if ($col == 'depo_cd') {
                     $depocd = empty($model[$col]) ? '-1' : $model[$col];
-                    $db = \DB::select('select func_depo_item(\'' . $depocd . '\') AS nb');
-                    $item = $db[0]->nb;
-                    preg_match('{\{\"\(' . $depocd . ',(.*)\)\"\}.*}', $item, $m);
-                    $item = $m[1];
+                    if (array_key_exists($depocd, $depoItemList)) {
+                        $item = $depoItemList[$depocd];
+                    } else {
+                        $db = \DB::select('select func_depo_item(\'' . $depocd . '\') AS nb');
+                        $item = $db[0]->nb;
+                        preg_match('{\{\"\(' . $depocd . ',(.*)\)\"\}.*}', $item, $m);
+                        $item = $m[1];
+                        $depoItemList[$depocd] = $item;
+                    }
+
                 }
                 $csv[] = $model[$col];
             }

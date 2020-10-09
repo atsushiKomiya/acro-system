@@ -100,10 +100,13 @@ class DefaultDepoItemApiController extends ApiController
 
             // C_LI_03_受注データ更新用CSV出力
             $depoCdList = [$depoCd];
-            $itemCdList = collect($depoItemList)->map(function ($item) {
-                return $item['itemCd'];
+            $itemList = collect($depoItemList)->map(function ($item) {
+                return array(
+                        'itemCategoryLargeCd' => $item['itemCategoryLargeCd'],
+                        'itemCategoryMediumCd' => $item['itemCategoryMediumCd'],
+                        'itemCd' => $item['itemCd']);
             })->all();
-            $orderCsvExpUsecase->chgDepoInfoCsv($depoCdList, null, $itemCdList, null, null);
+            $orderCsvExpUsecase->chgDepoInfoCsv($depoCdList, null, $itemList, null, null, null);
 
             // コミット
             DB::commit();

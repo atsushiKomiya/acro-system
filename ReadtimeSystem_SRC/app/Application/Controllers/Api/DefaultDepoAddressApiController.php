@@ -167,7 +167,7 @@ class DefaultDepoAddressApiController extends ApiController
                     'tyou' => $address['tyou']
                 ];
             })->all();
-            $orderCsvExpUsecase->chgDepoInfoCsv($depoCdList, $addressList, null, null, null);
+            $orderCsvExpUsecase->chgDepoInfoCsv($depoCdList, $addressList, null, null, null, null);
 
             // コミット
             DB::commit();

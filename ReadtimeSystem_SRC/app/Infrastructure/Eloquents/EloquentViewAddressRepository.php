@@ -176,20 +176,14 @@ class EloquentViewAddressRepository implements ViewAddressRepositoryInterface
         return $result;
     }
 
-
-    /**
-     * デフォルト一覧の取得
-     *
-     * @return LazyCollection
-     */
-    public function findDepoDefaultList(
+    private function depoDefaultListQuery(
         $pref,
         $depoCd,
         $itemCategoryLargecd,
         $itemCategoryMediumcd,
         $itemCd,
         $isConfig
-    ): LazyCollection {
+    ) {
         // メインQuery
         $query = $this->eloquent::select(
             'view_address.addrcd',
@@ -226,6 +220,7 @@ class EloquentViewAddressRepository implements ViewAddressRepositoryInterface
             'depo_default.holi_after_deadline_flg',
             'depo_default.holi_after_today_delivery_flg',
             'depo_default.private_home_flg',
+            'depo_default.handing_flg',
             'depo_default.congratulation_kbn_flg',
             'depo_default.transfer_post_depo_cd',
             'view_depo2.deponame as deponame2',
@@ -294,7 +289,45 @@ class EloquentViewAddressRepository implements ViewAddressRepositoryInterface
         $query->orderBy('view_address.zipcode', 'ASC')
         ->orderBy('view_address.addrcd', 'ASC')
         ->orderBy('depo_address_leadtime.depo_cd', 'ASC');
+        return $query;
+    }
+
+    /**
+     * デフォルト一覧の取得
+     *
+     * @return LazyCollection
+     */
+    public function findDepoDefaultList(
+        $pref,
+        $depoCd,
+        $itemCategoryLargecd,
+        $itemCategoryMediumcd,
+        $itemCd,
+        $isConfig
+    ): LazyCollection {
+        // メインQuery
+        $query = $this->depoDefaultListQuery($pref, $depoCd, $itemCategoryLargecd, $itemCategoryMediumcd, $itemCd, $isConfig);
         $result = $query->cursor();
+
+        return $result;
+    }
+
+    /**
+     * デフォルト一覧件数取得
+     *
+     * @return int
+     */
+    public function countDepoDefaultList (
+        $pref,
+        $depoCd,
+        $itemCategoryLargecd,
+        $itemCategoryMediumcd,
+        $itemCd,
+        $isConfig
+    ): int {
+        // メインQuery
+        $query = $this->depoDefaultListQuery($pref, $depoCd, $itemCategoryLargecd, $itemCategoryMediumcd, $itemCd, $isConfig);
+        $result = $query->count();
 
         return $result;
     }

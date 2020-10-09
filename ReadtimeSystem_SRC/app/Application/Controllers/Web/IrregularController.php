@@ -13,6 +13,12 @@ use Illuminate\Support\Facades\Config;
  */
 class IrregularController extends WebController
 {
+    public function __construct()
+    {
+        parent::__construct();
+        $this->middleware('check.auth');
+    }
+
     /**
      * イレギュラー設定画面表示
      *
@@ -67,6 +73,23 @@ class IrregularController extends WebController
             })->values();
         }
 
+        // 用途初期化
+        if ($irregular->cUse == null) {
+            // 初期値「すべて」にする
+            $irregular->cUse = '';
+        }
+        // 不可制御エリア 配送時間初期化
+        if ($irregular->timeSelect == null) {
+            // 初期値「なし」にする
+            $irregular->timeSelect = '';
+        }
+
+        // 配送不可&受注制御 デポ初期化
+        if ($irregular->isDepo == null) {
+            // 初期値「すべて」にする
+            $irregular->isDepo = false;
+        }
+
         return view('C_L31', compact(
             'cUseList',
             'isEdit',
@@ -92,7 +115,7 @@ class IrregularController extends WebController
         //用途選択肢取得
         $cUseList = $irregularUseCase->findCUseList();
         //時間選択選択肢取得
-        $timeSelectList = Config::get('time_select_list');
+        $timeSelectList = Config::get('delivery.time_select_list');
 
         //編集モードチェック
         $isEdit = false;
@@ -126,6 +149,23 @@ class IrregularController extends WebController
         })->values();
         //複製用
         $irregular->irregularId = null;
+
+        // 用途初期化
+        if ($irregular->cUse == null) {
+            // 初期値「すべて」にする
+            $irregular->cUse = '';
+        }
+        // 不可制御エリア 配送時間初期化
+        if ($irregular->timeSelect == null) {
+            // 初期値「なし」にする
+            $irregular->timeSelect = '';
+        }
+
+        // 配送不可&受注制御 デポ初期化
+        if ($irregular->isDepo == null) {
+            // 初期値「すべて」にする
+            $irregular->isDepo = false;
+        }
 
         return view('C_L31', compact(
             'cUseList',

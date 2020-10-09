@@ -27,6 +27,8 @@ return [
         'leadtime' => [
             'search' => 'リードタイム情報の検索に失敗しました。',
             'save' => 'リードタイム情報の登録に失敗しました。',
+            'save_surprise' => '指定された値は対象のデポ区分では登録できない値です。',
+            'save_entertainment' => '指定された値は対象のデポ区分では登録できない値です。',
             'upload' => 'リードタイム情報の取込に失敗しました。',
         ],
         'item' => [
@@ -59,6 +61,11 @@ return [
         'depo_not_exist' => 'デポCD【:depoCd】のデポは存在しません。',
         'item_not_exist' => '商品CD【:itemCd】の商品は存在しません。',
         'address_not_exist' => '都道府県CD【:prefCd】、市区郡【:siku】、町名【:tyou】の住所は存在しません。',
+    ],
+
+    // 権限
+    'AUTH' => [
+        'not_allowed' => '許可されていない操作です',
     ]
 
 ];

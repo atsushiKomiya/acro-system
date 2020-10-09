@@ -44,6 +44,7 @@ class Kernel extends HttpKernel
             'throttle:120,1',
             'bindings',
             \App\Http\Middleware\ConvertStringBooleans::class,
+            // \App\Http\Middleware\RequestResponseLog::class,
         ],
     ];
 
@@ -66,6 +67,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'UnescapeJsonResponse' => \App\Http\Middleware\UnescapeJsonResponse::class,
         'check.direct.access' => \App\Http\Middleware\CheckDirectAccess::class,
+        'check.auth' => \App\Http\Middleware\CheckAuthMiddleware::class,
     ];
 
     /**

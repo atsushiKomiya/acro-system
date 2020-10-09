@@ -123,13 +123,13 @@ class DepoCalInfoTmpUseCase
     }
 
     /**
-     * 【C_LB_03】CreanUPバッチ
+     * 【C_LB_03】CleanUPバッチ
      * デポカレンダ－情報-tmp論理削除
      * @return void
      */
-    public function deleteDepoCalInfoTmpCreanUp($criterionDate, $userId)
+    public function deleteDepoCalInfoTmpCleanUp($criterionDate, $userId)
     {
-        $data = $this->iDepoCalInfoTmpRepository->deleteDepoCalInfoTmpCreanUp($criterionDate, $userId);
+        $data = $this->iDepoCalInfoTmpRepository->deleteDepoCalInfoTmpCleanUp($criterionDate, $userId);
 
         return $data;
     }

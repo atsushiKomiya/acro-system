@@ -28,6 +28,7 @@
         "bootstrap4-toggle": "^3.6.1",
         "bulma": "^0.8.2",
         "moment": "^2.27.0",
+        "vue-cheetah-grid": "^0.22.3",
         "vue-quill-editor": "^3.0.6",
         "vuejs-datepicker": "^1.6.2",
         "webpack": "^4.43.0"

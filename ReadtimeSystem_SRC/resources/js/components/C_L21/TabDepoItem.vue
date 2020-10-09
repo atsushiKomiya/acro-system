@@ -174,10 +174,10 @@
         }
       },
       /** デポ商品住所リスト検索 */
-      search: function() {
+      search: async function() {
         this.$root.$refs.appProgress.busy(true);
         this.mRegosterItemList = [];
-        Repository.searchDepoItemList(
+        await Repository.searchDepoItemList(
           this.searchParam.searchDepocd,
           null
         ).then(response => {
@@ -279,13 +279,15 @@
         this.download(fileName,request,url);
       },
       /** upload後の処理 */
-      uploadAfter: function(response) {
+      uploadAfter: async function(response) {
         this.$emit('update:errorList', []);
         var result = response.data;
         if(result.isSuccess) {
+          await this.search();
           alert(result.message);
         } else {
           alert('アップロードが失敗しました');
+          this.$root.$refs.appProgress.busy(false);
           var errorList = result.message.split('<br>');
           this.$emit('update:errorList', errorList);
         }
