@@ -55,9 +55,10 @@ class DefaultCsvImportUseCase extends BaseCsvImportUseCase
      *
      * @param string $fileName
      * @param integer $displayType
+     * @param string $displayName
      * @return CsvImportResultEntity
      */
-    public function leadtimeCsv(string $fileName, $displayType): CsvImportResultEntity
+    public function leadtimeCsv(string $fileName, $displayType, string $displayName = null): CsvImportResultEntity
     {
         $parseErrors = [];
         $this->totalCount = 0;
@@ -70,7 +71,7 @@ class DefaultCsvImportUseCase extends BaseCsvImportUseCase
             $depoList = $this->depoListUsecase->findDepoListAll();
 
             DB::beginTransaction();
-            $parseErrors = $this->importFile($fileName, function ($rows, $lineNo) use ($depoList, $displayType) {
+            $parseErrors = $this->importFile($fileName, $displayName, function ($rows, $lineNo) use ($depoList, $displayType) {
                 // データ行
                 $this->totalCount++;
                 // baseカラム数
@@ -274,9 +275,10 @@ class DefaultCsvImportUseCase extends BaseCsvImportUseCase
      * デポ商品コード紐付タブ用のCSV取り込み処理
      *
      * @param string $fileName
+     * @param string $displayName
      * @return CsvImportResultEntity
      */
-    public function depoItemCsv(string $fileName): CsvImportResultEntity
+    public function depoItemCsv(string $fileName, string $displayName = null): CsvImportResultEntity
     {
         $parseErrors = [];
         $this->totalCount = 0;
@@ -291,7 +293,7 @@ class DefaultCsvImportUseCase extends BaseCsvImportUseCase
             $itemList = $this->itemUsecase->findViewItemList();
 
             DB::beginTransaction();
-            $parseErrors = $this->importFile($fileName, function ($rows, $lineNo) use ($depoList,$itemList) {
+            $parseErrors = $this->importFile($fileName, $displayName, function ($rows, $lineNo) use ($depoList,$itemList) {
                 // データ行
                 $this->totalCount++;
                 // baseカラム数
@@ -382,9 +384,10 @@ class DefaultCsvImportUseCase extends BaseCsvImportUseCase
      * デポ住所コード紐付タブ用のCSV取り込み処理
      *
      * @param string $fileName
+     * @param string $displayName
      * @return CsvImportResultEntity
      */
-    public function depoAddressCsv(string $fileName): CsvImportResultEntity
+    public function depoAddressCsv(string $fileName, string $displayName = null): CsvImportResultEntity
     {
         $parseErrors = [];
         $this->totalCount = 0;
@@ -397,7 +400,7 @@ class DefaultCsvImportUseCase extends BaseCsvImportUseCase
             $depoList = $this->depoListUsecase->findDepoListAll();
 
             DB::beginTransaction();
-            $parseErrors = $this->importFile($fileName, function ($rows, $lineNo) use ($depoList) {
+            $parseErrors = $this->importFile($fileName, $displayName, function ($rows, $lineNo) use ($depoList) {
                 // データ行
                 $this->totalCount++;
                 // baseカラム数

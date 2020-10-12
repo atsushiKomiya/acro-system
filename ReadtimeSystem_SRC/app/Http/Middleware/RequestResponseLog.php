@@ -60,11 +60,15 @@ class RequestResponseLog extends BaseApiResponse
      */
     private function logResponse($response)
     {
+        // statusメソッド、exceptionプロパティがないレスポンスの対応
+        $status = method_exists($response, 'status') ? $response->status() : '';
+        $exception = property_exists($response, 'exception') ? $response->exception : '';
+
         $this->logger->info("#Response",
             [
                 "header" => $response->headers, 
-                "status" => $response->status(), 
-                "exception" => $response->exception,
+                "status" => $status, 
+                "exception" => $exception,
             ]
         );
     }

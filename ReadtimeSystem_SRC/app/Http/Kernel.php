@@ -44,7 +44,7 @@ class Kernel extends HttpKernel
             'throttle:120,1',
             'bindings',
             \App\Http\Middleware\ConvertStringBooleans::class,
-            // \App\Http\Middleware\RequestResponseLog::class,
+            \App\Http\Middleware\RequestResponseLog::class,
         ],
     ];
 

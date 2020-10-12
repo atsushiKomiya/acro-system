@@ -56,7 +56,7 @@ class BaseCsvImportUseCase
      * @param [function] $rowCallback
      * @return array
      */
-    protected function importFile(string $fileName, $rowCallback): array
+    protected function importFile(string $fileName, $displayName, $rowCallback): array
     {
         $errors = [];
 
@@ -87,7 +87,11 @@ class BaseCsvImportUseCase
 
         // 元ファイルをバックアップフォルダに移動
         $tempFile = 'temp/' . $fileName;
-        $backupFile = 'backup/'. $fileName;
+        if ($displayName != null) {
+            $backupFile = 'backup/'. $displayName . '_' . date('YmdHis') . '.csv';
+        } else {
+            $backupFile = 'backup/'. $fileName;
+        }
         $disk = \Storage::disk('local');
         if ($disk->exists($backupFile)) {
             $disk->delete($backupFile);

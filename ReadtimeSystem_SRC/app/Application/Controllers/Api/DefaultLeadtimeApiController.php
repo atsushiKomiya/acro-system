@@ -56,15 +56,15 @@ class DefaultLeadtimeApiController extends ApiController
      */
     public function upload(Request $request, DefaultCsvImportUseCase $usecase)
     {
-
         $res = new BaseApiResponse();
         try {
             $displayType = $request->input('param');
+            $displayName = $request->input('display_name');
             // ファイルアップロード
             $fileName = $this->tempFileupload('uploadFile');
 
             // アップロード処理
-            $csvImportEntity = $usecase->leadtimeCsv($fileName, $displayType);
+            $csvImportEntity = $usecase->leadtimeCsv($fileName, $displayType, $displayName);
 
             if($csvImportEntity->isSuccess) {
                 // 成功

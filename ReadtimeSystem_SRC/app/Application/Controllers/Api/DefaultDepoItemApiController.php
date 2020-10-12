@@ -59,9 +59,10 @@ class DefaultDepoItemApiController extends ApiController
         try {
             // ファイルアップロード
             $fileName = $this->tempFileupload('uploadFile');
+            $displayName = $request->input('display_name');
 
             // アップロード処理
-            $csvImportEntity = $usecase->depoItemCsv($fileName);
+            $csvImportEntity = $usecase->depoItemCsv($fileName, $displayName);
 
             if($csvImportEntity->isSuccess) {
                 // 成功

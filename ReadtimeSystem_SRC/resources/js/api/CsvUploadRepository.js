@@ -10,7 +10,12 @@ export default {
     uploadApi(url,file,param) {
         let formData = new FormData();
         formData.append('uploadFile', file);
-        formData.append('param', param);
+        if (Object.keys(param).indexOf('param') !== -1) {
+            formData.append('param', param.param);
+        }
+        if (Object.keys(param).indexOf('display_name') !== -1) {
+            formData.append('display_name', param.display_name);
+        }
         return Client.post(url, formData);
     },
     uploadLeadtimeUrl() {

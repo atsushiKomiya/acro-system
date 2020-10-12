@@ -134,7 +134,7 @@
         </form>
       </div>
       <div class="col-md-3 btn-right">
-        <button type="button" @click="upload(uploadLeadtimeUrl,mUploadfile,uploadAfter,searchParam.searchDisplayType)" v-bind:disabled="!mUploadfile" class="btn btn-primary">CSV取込</button>
+        <button type="button" @click="upload(uploadLeadtimeUrl,mUploadfile,uploadAfter,{'param': searchParam.searchDisplayType, 'display_name': 'L_C21_Leadtime'})" v-bind:disabled="!mUploadfile" class="btn btn-primary">CSV取込</button>
         <button type="button" @click="register" class="btn btn-primary">登録</button>
       </div>
     </div>
